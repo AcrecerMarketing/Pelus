@@ -1,0 +1,32 @@
+/* Pelus Admin Panel */
+.pelus-admin{max-width:1100px}
+.pelus-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
+.pelus-toolbar input,.pelus-toolbar select{padding:6px 10px;border:1px solid #ccd0d4;border-radius:4px;font-size:.9rem}
+
+/* Table */
+.pelus-table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.pelus-table th{background:#8b5cf6;color:#fff;padding:10px 14px;text-align:left;font-size:.85rem;white-space:nowrap}
+.pelus-table td{padding:10px 14px;border-bottom:1px solid #f0f0f0;font-size:.9rem;vertical-align:middle}
+.pelus-table tr:last-child td{border-bottom:none}
+.pelus-table tr:hover td{background:#faf5ff}
+
+/* Status badges */
+.pelus-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.78rem;font-weight:600}
+.pelus-badge-pending{background:#fef3c7;color:#92400e}
+.pelus-badge-confirmed{background:#d1fae5;color:#065f46}
+.pelus-badge-cancelled{background:#fee2e2;color:#991b1b}
+.pelus-badge-completed{background:#dbeafe;color:#1e40af}
+
+/* Status select in table */
+.pelus-status-select{padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:.82rem;cursor:pointer}
+
+/* Modal */
+.pelus-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center}
+.pelus-modal-content{background:#fff;border-radius:12px;padding:28px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.pelus-modal-content h2{margin:0 0 20px;color:#1f2937;font-size:1.1rem}
+.pelus-modal-content label{display:block;font-size:.85rem;font-weight:600;color:#374151;margin-bottom:4px}
+.pelus-modal-content input,.pelus-modal-content textarea{width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:.9rem;margin-bottom:14px}
+.pelus-modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
+
+/* Empty state */
+.pelus-empty{text-align:center;padding:40px;color:#6b7280;font-size:.95rem}

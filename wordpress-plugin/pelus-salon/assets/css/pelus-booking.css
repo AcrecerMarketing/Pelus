@@ -1,0 +1,59 @@
+/* Pelus Salon – Booking Widget */
+#pelus-booking-app *{box-sizing:border-box;font-family:inherit}
+#pelus-booking-app{max-width:560px;margin:0 auto;padding:16px}
+
+/* Steps */
+.pelus-steps{display:flex;gap:0;margin-bottom:28px;border-radius:10px;overflow:hidden;background:#f0f0f0}
+.pelus-step{flex:1;padding:10px 4px;text-align:center;font-size:.8rem;color:#888;border:none;background:none;cursor:default;transition:background .2s,color .2s}
+.pelus-step.active{background:#8b5cf6;color:#fff;font-weight:600}
+.pelus-step.done{background:#d8b4fe;color:#5b21b6}
+
+/* Cards */
+.pelus-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:20px;margin-bottom:14px;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+.pelus-card:hover,.pelus-card.selected{border-color:#8b5cf6;box-shadow:0 0 0 3px #ede9fe}
+.pelus-card h3{margin:0 0 4px;font-size:1rem;color:#1f2937}
+.pelus-card p{margin:0;font-size:.85rem;color:#6b7280}
+.pelus-card .pelus-meta{display:flex;gap:12px;margin-top:8px;font-size:.8rem;color:#8b5cf6;font-weight:600}
+
+/* Date + slots */
+.pelus-date-picker{width:100%;padding:10px 14px;border:1px solid #d1d5db;border-radius:10px;font-size:1rem;margin-bottom:16px}
+.pelus-slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-bottom:16px}
+.pelus-slot{padding:8px;text-align:center;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;font-size:.85rem;transition:background .15s,border-color .15s}
+.pelus-slot:hover,.pelus-slot.selected{background:#8b5cf6;color:#fff;border-color:#8b5cf6}
+.pelus-no-slots{text-align:center;color:#6b7280;padding:24px 0;font-size:.9rem}
+
+/* Form */
+.pelus-form label{display:block;font-size:.85rem;font-weight:600;color:#374151;margin-bottom:4px}
+.pelus-form input,.pelus-form textarea{width:100%;padding:10px 14px;border:1px solid #d1d5db;border-radius:10px;font-size:.95rem;margin-bottom:14px;background:#fff}
+.pelus-form input:focus,.pelus-form textarea:focus{outline:none;border-color:#8b5cf6;box-shadow:0 0 0 3px #ede9fe}
+
+/* Buttons */
+.pelus-btn{display:inline-block;padding:12px 24px;border-radius:10px;border:none;cursor:pointer;font-size:.95rem;font-weight:600;transition:background .2s}
+.pelus-btn-primary{background:#8b5cf6;color:#fff}
+.pelus-btn-primary:hover{background:#7c3aed}
+.pelus-btn-secondary{background:#f3f4f6;color:#374151}
+.pelus-btn-secondary:hover{background:#e5e7eb}
+.pelus-btn-row{display:flex;gap:10px;justify-content:space-between;margin-top:8px}
+
+/* Summary card */
+.pelus-summary{background:#f5f3ff;border:1px solid #ddd6fe;border-radius:14px;padding:20px;margin-bottom:16px}
+.pelus-summary h3{margin:0 0 12px;color:#5b21b6;font-size:1rem}
+.pelus-summary-row{display:flex;justify-content:space-between;font-size:.9rem;margin-bottom:6px;color:#374151}
+.pelus-summary-row strong{color:#1f2937}
+
+/* Success */
+.pelus-success{text-align:center;padding:32px 16px}
+.pelus-success-icon{font-size:3rem;margin-bottom:12px}
+.pelus-success h2{color:#059669;margin-bottom:8px}
+.pelus-success p{color:#6b7280;font-size:.9rem}
+
+/* Loader */
+.pelus-loader{text-align:center;padding:24px;color:#8b5cf6}
+.pelus-spinner{display:inline-block;width:24px;height:24px;border:3px solid #ede9fe;border-top-color:#8b5cf6;border-radius:50%;animation:pelus-spin .7s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes pelus-spin{to{transform:rotate(360deg)}}
+
+/* Error */
+.pelus-error{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 16px;color:#dc2626;font-size:.85rem;margin-bottom:12px}
+
+/* Section title */
+.pelus-section-title{font-size:1.1rem;font-weight:700;color:#1f2937;margin:0 0 16px}
