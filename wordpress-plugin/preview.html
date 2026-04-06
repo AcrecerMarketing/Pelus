@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Pelus Salon – Preview</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f0f0;color:#1f2937}
+
+/* ── Layout ── */
+.page{display:grid;grid-template-columns:200px 1fr;min-height:100vh}
+
+/* ── WP Sidebar ── */
+.wp-sidebar{background:#1d2327;padding:0;position:sticky;top:0;height:100vh;overflow:auto}
+.wp-logo{padding:16px;border-bottom:1px solid #333;display:flex;align-items:center;gap:8px}
+.wp-logo svg{width:32px;height:32px;fill:#fff}
+.wp-logo span{color:#fff;font-size:.9rem;font-weight:600}
+.wp-menu-item{display:flex;align-items:center;gap:10px;padding:10px 16px;color:#c3c4c7;font-size:.82rem;cursor:pointer;transition:background .15s}
+.wp-menu-item:hover{background:#2c3338;color:#fff}
+.wp-menu-item.active{background:#8b5cf6;color:#fff}
+.wp-menu-item .icon{font-size:1rem;width:20px;text-align:center}
+.wp-submenu{background:#161b1f;padding:4px 0}
+.wp-submenu-item{display:block;padding:7px 16px 7px 46px;color:#a7aaad;font-size:.78rem;cursor:pointer}
+.wp-submenu-item:hover{color:#fff}
+.wp-submenu-item.active{color:#c084fc}
+
+/* ── Main content ── */
+.wp-main{display:flex;flex-direction:column}
+.wp-topbar{background:#1d2327;height:32px;display:flex;align-items:center;padding:0 12px;gap:16px}
+.wp-topbar span{color:#c3c4c7;font-size:.75rem}
+.wp-topbar .site-name{color:#72aee6}
+.wp-content{padding:20px 24px;flex:1;background:#f0f0f0}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:2px;margin-bottom:24px;border-bottom:2px solid #8b5cf6}
+.tab{padding:9px 18px;cursor:pointer;font-size:.85rem;color:#6b7280;border-radius:6px 6px 0 0;background:none;border:none;transition:background .15s}
+.tab.active{background:#8b5cf6;color:#fff;font-weight:600}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* ── Section titles ── */
+h1{font-size:1.3rem;color:#1d2327;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+h1 .badge{background:#8b5cf6;color:#fff;font-size:.65rem;padding:2px 8px;border-radius:20px;vertical-align:middle;font-weight:600}
+
+/* ── Booking widget (frontend) ── */
+.widget-wrapper{background:#f9fafb;border:2px dashed #d1d5db;border-radius:14px;padding:24px;margin-bottom:24px}
+.widget-label{font-size:.75rem;color:#9ca3af;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.widget-label::before{content:'';flex:1;height:1px;background:#e5e7eb}
+.widget-label::after{content:'';flex:1;height:1px;background:#e5e7eb}
+#pelus-booking-app{max-width:520px;margin:0 auto}
+
+/* Steps */
+.pelus-steps{display:flex;gap:0;margin-bottom:24px;border-radius:10px;overflow:hidden;background:#f0f0f0}
+.pelus-step{flex:1;padding:9px 4px;text-align:center;font-size:.78rem;color:#9ca3af}
+.pelus-step.active{background:#8b5cf6;color:#fff;font-weight:600}
+.pelus-step.done{background:#d8b4fe;color:#5b21b6}
+
+/* Cards */
+.pelus-card{background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:10px;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+.pelus-card.selected{border-color:#8b5cf6;box-shadow:0 0 0 3px #ede9fe}
+.pelus-card h3{margin:0 0 3px;font-size:.95rem;color:#1f2937}
+.pelus-card p{margin:0;font-size:.8rem;color:#6b7280}
+.pelus-card .meta{display:flex;gap:12px;margin-top:7px;font-size:.75rem;color:#8b5cf6;font-weight:600}
+
+/* ── Admin tables ── */
+.pelus-card-box{background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden;margin-bottom:20px}
+.pelus-card-box-header{padding:14px 18px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between}
+.pelus-card-box-header h2{font-size:.95rem;color:#1f2937}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;font-size:.8rem;font-weight:600;border:none;cursor:pointer}
+.btn-primary{background:#8b5cf6;color:#fff}.btn-primary:hover{background:#7c3aed}
+.btn-sm{padding:4px 10px;font-size:.75rem;border-radius:6px}
+.btn-outline{background:none;border:1px solid #d1d5db;color:#374151}.btn-outline:hover{background:#f9fafb}
+.btn-danger{background:#fee2e2;color:#dc2626;border:1px solid #fecaca}.btn-danger:hover{background:#fecaca}
+
+table{width:100%;border-collapse:collapse}
+th{background:#8b5cf6;color:#fff;padding:10px 14px;text-align:left;font-size:.78rem;white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid #f0f0f0;font-size:.82rem;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#faf5ff}
+
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:.72rem;font-weight:600}
+.badge-pending{background:#fef3c7;color:#92400e}
+.badge-confirmed{background:#d1fae5;color:#065f46}
+.badge-cancelled{background:#fee2e2;color:#991b1b}
+.badge-completed{background:#dbeafe;color:#1e40af}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.stat{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.07);display:flex;flex-direction:column;gap:4px}
+.stat .num{font-size:1.7rem;font-weight:700;color:#8b5cf6}
+.stat .lbl{font-size:.75rem;color:#6b7280}
+.stat .trend{font-size:.72rem;color:#059669;font-weight:600}
+
+/* Toolbar */
+.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.toolbar input,.toolbar select{padding:7px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:.8rem;color:#374151;background:#fff}
+
+/* Slot grid preview */
+.slots-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin:12px 0}
+.slot{padding:8px;text-align:center;border:1.5px solid #d1d5db;border-radius:8px;font-size:.8rem;cursor:pointer}
+.slot.taken{background:#f3f4f6;color:#9ca3af;text-decoration:line-through;cursor:not-allowed}
+.slot.sel{background:#8b5cf6;color:#fff;border-color:#8b5cf6}
+
+/* Modal overlay */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;display:flex;align-items:center;justify-content:center}
+.modal{background:#fff;border-radius:14px;padding:24px;width:380px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal h2{font-size:1rem;margin-bottom:16px;color:#1f2937}
+.modal label{display:block;font-size:.78rem;font-weight:600;color:#374151;margin-bottom:3px}
+.modal input,.modal textarea,.modal select{width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:.85rem;margin-bottom:12px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+
+/* Form in widget */
+.form-field label{display:block;font-size:.78rem;font-weight:600;color:#374151;margin-bottom:3px}
+.form-field input,.form-field textarea{width:100%;padding:9px 12px;border:1.5px solid #d1d5db;border-radius:9px;font-size:.9rem;margin-bottom:12px;background:#fff}
+.form-field input:focus{border-color:#8b5cf6;outline:none;box-shadow:0 0 0 3px #ede9fe}
+
+.btn-row{display:flex;justify-content:space-between;margin-top:8px}
+.summary-box{background:#f5f3ff;border:1px solid #ddd6fe;border-radius:12px;padding:16px;margin-bottom:14px}
+.summary-box h3{color:#5b21b6;font-size:.85rem;margin-bottom:10px}
+.summary-row{display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:5px;color:#374151}
+.success-box{text-align:center;padding:28px 16px}
+.success-icon{font-size:2.8rem;margin-bottom:10px}
+.success-box h2{color:#059669;font-size:1.1rem;margin-bottom:6px}
+.success-box p{color:#6b7280;font-size:.82rem}
+
+/* Shortcode hint */
+.shortcode-hint{background:#1d2327;color:#a8c0d0;font-family:monospace;font-size:.82rem;padding:8px 14px;border-radius:8px;display:inline-block;margin-bottom:16px}
+.shortcode-hint span{color:#c084fc}
+
+/* Nav pill */
+.nav-pill{display:inline-flex;background:#f3f4f6;border-radius:8px;padding:3px;margin-bottom:18px;gap:2px}
+.nav-pill button{padding:5px 14px;border:none;background:none;border-radius:6px;font-size:.78rem;cursor:pointer;color:#6b7280;font-weight:500}
+.nav-pill button.active{background:#fff;color:#8b5cf6;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- WP Sidebar -->
+  <nav class="wp-sidebar">
+    <div class="wp-logo">
+      <svg viewBox="0 0 20 20"><path d="M10 0C4.5 0 0 4.5 0 10s4.5 10 10 10 10-4.5 10-10S15.5 0 10 0zm0 18.5c-4.7 0-8.5-3.8-8.5-8.5S5.3 1.5 10 1.5s8.5 3.8 8.5 8.5-3.8 8.5-8.5 8.5z"/></svg>
+      <span>Mi Salón WP</span>
+    </div>
+    <div class="wp-menu-item"><span class="icon">🏠</span> Escritorio</div>
+    <div class="wp-menu-item"><span class="icon">📝</span> Entradas</div>
+    <div class="wp-menu-item"><span class="icon">📄</span> Páginas</div>
+    <div class="wp-menu-item active"><span class="icon">📅</span> Pelus Salón</div>
+    <div class="wp-submenu">
+      <div class="wp-submenu-item active">Citas</div>
+      <div class="wp-submenu-item">Servicios</div>
+      <div class="wp-submenu-item">Empleados</div>
+    </div>
+    <div class="wp-menu-item"><span class="icon">🔌</span> Plugins</div>
+    <div class="wp-menu-item"><span class="icon">⚙️</span> Ajustes</div>
+  </nav>
+
+  <!-- Main area -->
+  <div class="wp-main">
+    <div class="wp-topbar">
+      <span>Mi Salón WP</span>
+      <span style="color:#666">›</span>
+      <span class="site-name">Pelus Salón</span>
+    </div>
+    <div class="wp-content">
+
+      <!-- Tab navigation -->
+      <div class="nav-pill">
+        <button class="active" onclick="showTab('citas')">📅 Citas</button>
+        <button onclick="showTab('servicios')">✂️ Servicios</button>
+        <button onclick="showTab('empleados')">👥 Empleados</button>
+        <button onclick="showTab('frontend')">🌐 Widget público</button>
+      </div>
+
+      <!-- ═══ TAB: CITAS ═══ -->
+      <div id="tab-citas" class="tab-panel active">
+        <h1>📅 Citas <span class="badge">Admin</span></h1>
+
+        <div class="stats">
+          <div class="stat"><div class="num">12</div><div class="lbl">Citas hoy</div><div class="trend">↑ 3 vs ayer</div></div>
+          <div class="stat"><div class="num">5</div><div class="lbl" style="color:#92400e">Pendientes</div></div>
+          <div class="stat"><div class="num">6</div><div class="lbl" style="color:#065f46">Confirmadas</div></div>
+          <div class="stat"><div class="num">1</div><div class="lbl" style="color:#1e40af">Completadas</div></div>
+        </div>
+
+        <div class="toolbar">
+          <input type="date" value="2026-04-01" />
+          <select>
+            <option>Todos los estados</option>
+            <option>Pendiente</option>
+            <option>Confirmada</option>
+            <option>Completada</option>
+            <option>Cancelada</option>
+          </select>
+          <button class="btn btn-primary btn-sm">Filtrar</button>
+        </div>
+
+        <div class="pelus-card-box">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Cliente</th><th>Servicio</th><th>Estilista</th><th>Fecha</th><th>Hora</th><th>Estado</th><th>Acción</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>8</td>
+                <td><strong>Laura Sánchez</strong><br><small style="color:#9ca3af">laura@mail.com</small></td>
+                <td>Coloración</td><td>María García</td><td>01/04/2026</td><td>09:00–11:00</td>
+                <td><span class="badge badge-confirmed">Confirmada</span></td>
+                <td><button class="btn btn-danger btn-sm">Eliminar</button></td>
+              </tr>
+              <tr>
+                <td>9</td>
+                <td><strong>Pedro Ruiz</strong><br><small style="color:#9ca3af">pedro@mail.com</small></td>
+                <td>Corte de cabello</td><td>Carlos López</td><td>01/04/2026</td><td>10:00–10:30</td>
+                <td><span class="badge badge-pending">Pendiente</span></td>
+                <td><button class="btn btn-danger btn-sm">Eliminar</button></td>
+              </tr>
+              <tr>
+                <td>10</td>
+                <td><strong>Ana Torres</strong><br><small style="color:#9ca3af">ana@mail.com</small></td>
+                <td>Manicure</td><td>Ana Martínez</td><td>01/04/2026</td><td>11:00–11:45</td>
+                <td><span class="badge badge-pending">Pendiente</span></td>
+                <td><button class="btn btn-danger btn-sm">Eliminar</button></td>
+              </tr>
+              <tr>
+                <td>11</td>
+                <td><strong>Sofía Lara</strong><br><small style="color:#9ca3af">sofia@mail.com</small></td>
+                <td>Tratamiento capilar</td><td>María García</td><td>01/04/2026</td><td>14:00–15:30</td>
+                <td><span class="badge badge-completed">Completada</span></td>
+                <td><button class="btn btn-danger btn-sm">Eliminar</button></td>
+              </tr>
+              <tr>
+                <td>12</td>
+                <td><strong>Diego Mora</strong><br><small style="color:#9ca3af">diego@mail.com</small></td>
+                <td>Pedicure</td><td>Ana Martínez</td><td>01/04/2026</td><td>16:00–17:00</td>
+                <td><span class="badge badge-cancelled">Cancelada</span></td>
+                <td><button class="btn btn-danger btn-sm">Eliminar</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══ TAB: SERVICIOS ═══ -->
+      <div id="tab-servicios" class="tab-panel">
+        <h1>✂️ Servicios <span class="badge">Admin</span></h1>
+        <button class="btn btn-primary" style="margin-bottom:16px" onclick="document.getElementById('svc-modal').style.display='flex'">+ Nuevo servicio</button>
+        <div class="pelus-card-box">
+          <table>
+            <thead><tr><th>#</th><th>Nombre</th><th>Duración</th><th>Precio</th><th>Acciones</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td><strong>Corte de cabello</strong><br><small style="color:#9ca3af">Corte personalizado según tu estilo</small></td><td>30 min</td><td>$25.00</td><td><button class="btn btn-outline btn-sm">Editar</button> <button class="btn btn-danger btn-sm">Eliminar</button></td></tr>
+              <tr><td>2</td><td><strong>Coloración</strong><br><small style="color:#9ca3af">Tinte completo con productos profesionales</small></td><td>120 min</td><td>$85.00</td><td><button class="btn btn-outline btn-sm">Editar</button> <button class="btn btn-danger btn-sm">Eliminar</button></td></tr>
+              <tr><td>3</td><td><strong>Manicure</strong><br><small style="color:#9ca3af">Limpieza y esmaltado de uñas</small></td><td>45 min</td><td>$20.00</td><td><button class="btn btn-outline btn-sm">Editar</button> <button class="btn btn-danger btn-sm">Eliminar</button></td></tr>
+              <tr><td>4</td><td><strong>Pedicure</strong><br><small style="color:#9ca3af">Tratamiento completo de pies</small></td><td>60 min</td><td>$30.00</td><td><button class="btn btn-outline btn-sm">Editar</button> <button class="btn btn-danger btn-sm">Eliminar</button></td></tr>
+              <tr><td>5</td><td><strong>Tratamiento capilar</strong><br><small style="color:#9ca3af">Hidratación profunda y nutrición</small></td><td>90 min</td><td>$55.00</td><td><button class="btn btn-outline btn-sm">Editar</button> <button class="btn btn-danger btn-sm">Eliminar</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══ TAB: EMPLEADOS ═══ -->
+      <div id="tab-empleados" class="tab-panel">
+        <h1>👥 Empleados <span class="badge">Admin</span></h1>
+        <button class="btn btn-primary" style="margin-bottom:16px">+ Nuevo empleado</button>
+        <div class="pelus-card-box">
+          <table>
+            <thead><tr><th>#</th><th>Nombre</th><th>Email</th><th>Especialidad</th><th>Acciones</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td><div style="display:flex;align-items:center;gap:8px"><div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#c084fc,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem;font-weight:700">MG</div><strong>María García</strong></div></td>
+                <td>maria@salon.com</td><td>Coloración y tratamientos</td>
+                <td><button class="btn btn-outline btn-sm">Editar</button> <button class="btn btn-danger btn-sm">Eliminar</button></td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td><div style="display:flex;align-items:center;gap:8px"><div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#60a5fa,#3b82f6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem;font-weight:700">CL</div><strong>Carlos López</strong></div></td>
+                <td>carlos@salon.com</td><td>Cortes y estilos</td>
+                <td><button class="btn btn-outline btn-sm">Editar</button> <button class="btn btn-danger btn-sm">Eliminar</button></td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td><div style="display:flex;align-items:center;gap:8px"><div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#34d399,#10b981);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem;font-weight:700">AM</div><strong>Ana Martínez</strong></div></td>
+                <td>ana@salon.com</td><td>Uñas y manicure</td>
+                <td><button class="btn btn-outline btn-sm">Editar</button> <button class="btn btn-danger btn-sm">Eliminar</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══ TAB: WIDGET PÚBLICO (steps) ═══ -->
+      <div id="tab-frontend" class="tab-panel">
+        <h1>🌐 Vista pública <span class="badge">Shortcode</span></h1>
+        <div class="shortcode-hint">Pega en cualquier página: <span>[pelus_booking]</span></div>
+
+        <div class="nav-pill" style="margin-top:12px">
+          <button class="active" onclick="showWidget('step1')">Paso 1</button>
+          <button onclick="showWidget('step2')">Paso 2</button>
+          <button onclick="showWidget('step3')">Paso 3</button>
+          <button onclick="showWidget('step4')">Confirmación</button>
+          <button onclick="showWidget('step5')">Éxito</button>
+        </div>
+
+        <div class="widget-wrapper">
+          <div class="widget-label">Vista del cliente en el sitio web</div>
+          <div id="pelus-booking-app">
+
+            <!-- STEP 1 -->
+            <div id="widget-step1">
+              <div class="pelus-steps">
+                <div class="pelus-step active">Servicio</div>
+                <div class="pelus-step">Horario</div>
+                <div class="pelus-step">Datos</div>
+                <div class="pelus-step">Confirmar</div>
+              </div>
+              <p style="font-size:.9rem;font-weight:700;color:#1f2937;margin-bottom:12px">¿Qué servicio deseas?</p>
+              <div class="pelus-card selected">
+                <h3>Coloración</h3>
+                <p>Tinte completo con productos profesionales</p>
+                <div class="meta"><span>⏱ 120 min</span><span>$85.00</span></div>
+              </div>
+              <div class="pelus-card">
+                <h3>Corte de cabello</h3>
+                <p>Corte personalizado según tu estilo</p>
+                <div class="meta"><span>⏱ 30 min</span><span>$25.00</span></div>
+              </div>
+              <div class="pelus-card">
+                <h3>Manicure</h3>
+                <p>Limpieza y esmaltado de uñas</p>
+                <div class="meta"><span>⏱ 45 min</span><span>$20.00</span></div>
+              </div>
+              <div class="btn-row"><span></span><button class="btn btn-primary">Siguiente →</button></div>
+            </div>
+
+            <!-- STEP 2 -->
+            <div id="widget-step2" style="display:none">
+              <div class="pelus-steps">
+                <div class="pelus-step done">✓ Servicio</div>
+                <div class="pelus-step active">Horario</div>
+                <div class="pelus-step">Datos</div>
+                <div class="pelus-step">Confirmar</div>
+              </div>
+              <p style="font-size:.9rem;font-weight:700;color:#1f2937;margin-bottom:12px">Elige estilista y horario</p>
+              <p style="font-size:.78rem;color:#6b7280;margin-bottom:8px">Estilista</p>
+              <div class="pelus-card selected"><h3>María García</h3><p>Coloración y tratamientos</p></div>
+              <div class="pelus-card"><h3>Carlos López</h3><p>Cortes y estilos</p></div>
+              <p style="font-size:.78rem;color:#6b7280;margin:10px 0 6px">Fecha</p>
+              <input type="date" value="2026-04-01" style="width:100%;padding:9px 12px;border:1.5px solid #8b5cf6;border-radius:9px;font-size:.9rem;margin-bottom:14px;box-shadow:0 0 0 3px #ede9fe;background:#fff"/>
+              <p style="font-size:.78rem;color:#6b7280;margin-bottom:8px">Hora disponible</p>
+              <div class="slots-grid">
+                <div class="slot taken">09:00</div>
+                <div class="slot taken">09:30</div>
+                <div class="slot">10:00</div>
+                <div class="slot sel">10:30</div>
+                <div class="slot">11:00</div>
+                <div class="slot">11:30</div>
+                <div class="slot taken">12:00</div>
+                <div class="slot">13:00</div>
+                <div class="slot">13:30</div>
+                <div class="slot">14:00</div>
+              </div>
+              <div class="btn-row"><button class="btn btn-outline">← Atrás</button><button class="btn btn-primary">Siguiente →</button></div>
+            </div>
+
+            <!-- STEP 3 -->
+            <div id="widget-step3" style="display:none">
+              <div class="pelus-steps">
+                <div class="pelus-step done">✓ Servicio</div>
+                <div class="pelus-step done">✓ Horario</div>
+                <div class="pelus-step active">Datos</div>
+                <div class="pelus-step">Confirmar</div>
+              </div>
+              <p style="font-size:.9rem;font-weight:700;color:#1f2937;margin-bottom:14px">Tus datos de contacto</p>
+              <div class="form-field">
+                <label>Nombre completo *</label>
+                <input type="text" value="Laura Sánchez" style="border-color:#8b5cf6;box-shadow:0 0 0 3px #ede9fe"/>
+                <label>Email *</label>
+                <input type="email" value="laura@mail.com"/>
+                <label>Teléfono</label>
+                <input type="tel" value="+1 555-0200"/>
+                <label>Notas adicionales</label>
+                <textarea rows="2" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;border-radius:9px;font-size:.85rem;resize:none">Prefiero tinte oscuro</textarea>
+              </div>
+              <div class="btn-row" style="margin-top:12px"><button class="btn btn-outline">← Atrás</button><button class="btn btn-primary">Revisar →</button></div>
+            </div>
+
+            <!-- STEP 4 - Confirm -->
+            <div id="widget-step4" style="display:none">
+              <div class="pelus-steps">
+                <div class="pelus-step done">✓ Servicio</div>
+                <div class="pelus-step done">✓ Horario</div>
+                <div class="pelus-step done">✓ Datos</div>
+                <div class="pelus-step active">Confirmar</div>
+              </div>
+              <p style="font-size:.9rem;font-weight:700;color:#1f2937;margin-bottom:12px">Confirmar reserva</p>
+              <div class="summary-box">
+                <h3>Resumen</h3>
+                <div class="summary-row"><span>Servicio</span><strong>Coloración</strong></div>
+                <div class="summary-row"><span>Duración</span><strong>120 min</strong></div>
+                <div class="summary-row"><span>Precio</span><strong>$85.00</strong></div>
+                <div class="summary-row"><span>Estilista</span><strong>María García</strong></div>
+                <div class="summary-row"><span>Fecha</span><strong>01/04/2026</strong></div>
+                <div class="summary-row"><span>Hora</span><strong>10:30 – 12:30</strong></div>
+                <hr style="border:none;border-top:1px solid #ddd6fe;margin:8px 0"/>
+                <div class="summary-row"><span>Nombre</span><strong>Laura Sánchez</strong></div>
+                <div class="summary-row"><span>Email</span><strong>laura@mail.com</strong></div>
+                <div class="summary-row"><span>Teléfono</span><strong>+1 555-0200</strong></div>
+              </div>
+              <div class="btn-row"><button class="btn btn-outline">← Editar</button><button class="btn btn-primary">Confirmar cita ✓</button></div>
+            </div>
+
+            <!-- STEP 5 - Success -->
+            <div id="widget-step5" style="display:none">
+              <div class="success-box">
+                <div class="success-icon">🎉</div>
+                <h2 style="color:#059669;font-size:1.15rem;margin-bottom:6px">¡Cita reservada!</h2>
+                <p style="color:#6b7280;font-size:.85rem">Recibirás un email de confirmación en <strong>laura@mail.com</strong></p>
+                <br/>
+                <div class="summary-box" style="text-align:left;max-width:280px;margin:0 auto 16px">
+                  <div class="summary-row"><span>Servicio</span><strong>Coloración</strong></div>
+                  <div class="summary-row"><span>Fecha</span><strong>01/04/2026</strong></div>
+                  <div class="summary-row"><span>Hora</span><strong>10:30</strong></div>
+                  <div class="summary-row"><span>Estilista</span><strong>María García</strong></div>
+                </div>
+                <button class="btn btn-primary" style="margin:0 auto">Reservar otra cita</button>
+              </div>
+            </div>
+
+          </div><!-- /pelus-booking-app -->
+        </div><!-- /widget-wrapper -->
+      </div>
+    </div><!-- /wp-content -->
+  </div><!-- /wp-main -->
+</div><!-- /page -->
+
+<!-- Service modal -->
+<div id="svc-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal">
+    <h2>✂️ Nuevo servicio</h2>
+    <label>Nombre</label><input type="text" placeholder="Ej. Alisado keratina"/>
+    <label>Descripción</label><textarea rows="2" placeholder="Descripción breve…"></textarea>
+    <label>Duración (minutos)</label><input type="number" value="60"/>
+    <label>Precio ($)</label><input type="number" value="0" step="0.01"/>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('svc-modal').style.display='none'">Cancelar</button>
+      <button class="btn btn-primary btn-sm">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.nav-pill button').forEach((b,i) => {
+    b.classList.toggle('active', ['citas','servicios','empleados','frontend'][i] === name);
+  });
+}
+function showWidget(step) {
+  ['step1','step2','step3','step4','step5'].forEach(s => {
+    document.getElementById('widget-'+s).style.display = s===step?'block':'none';
+  });
+  document.querySelectorAll('#tab-frontend .nav-pill button').forEach((b,i) => {
+    b.classList.toggle('active', i === ['step1','step2','step3','step4','step5'].indexOf(step));
+  });
+}
+</script>
+</body>
+</html>
