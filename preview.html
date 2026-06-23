@@ -63,7 +63,7 @@ const IMGS={
 };
 
 const state={
-  page:'home', selectedId:null, session:null, cat:null,
+  page:'home', selectedId:null, session:null, cat:null, sizeGroup:null, gender:null,
   nextId:6, nextCid:5, nextNid:1,
   users:[
     {id:1,name:'María González',  email:'maria@demo.com', pass:'demo123'},
@@ -71,11 +71,11 @@ const state={
     {id:3,name:'Lucía Fernández', email:'lucia@demo.com', pass:'demo123'},
   ],
   items:[
-    {id:1,uid:1,title:'Pantalón verde del colegio',cat:'pantalon',size:'M',desc:'En muy buen estado, usado solo un ciclo escolar. Sin roturas ni manchas. La cintura elástica está perfecta.',img:IMGS.pants,status:'disponible',date:'20 jun 2026'},
-    {id:2,uid:2,title:'Remera amarilla con escudo del colegio', cat:'remera',  size:'S',desc:'Remera blanca sin manchas, lavada y lista para usar. Muy poco uso, apenas se nota que fue usada.',img:IMGS.shirt,status:'disponible',date:'19 jun 2026'},
-    {id:3,uid:3,title:'Pulso azul del colegio',     cat:'pulso',   size:'L',desc:'Buzo talle L en excelente estado. Le queda grande a mi hijo y lo cambiamos por talle M.',img:IMGS.pulso1,status:'disponible',date:'18 jun 2026'},
-    {id:4,uid:1,title:'Pantalón talle XL',           cat:'pantalon',size:'XL',desc:'Pantalón usado dos años, buen estado general. Ideal para alumno de último año.',img:IMGS.pantalon2,status:'disponible',date:'17 jun 2026'},
-    {id:5,uid:2,title:'Remera polo talle XS',         cat:'remera',  size:'XS',desc:'Casi sin uso, perfecta para primer año. La compré de más y nunca la usamos.',img:IMGS.remera2,status:'intercambiado',date:'15 jun 2026'},
+    {id:1,uid:1,title:'Pantalón verde del colegio',cat:'pantalon',size:'M',gender:'unisex',desc:'En muy buen estado, usado solo un ciclo escolar. Sin roturas ni manchas. La cintura elástica está perfecta.',img:IMGS.pants,status:'disponible',date:'20 jun 2026'},
+    {id:2,uid:2,title:'Remera amarilla con escudo del colegio',cat:'remera',size:'S',gender:'nina',desc:'Remera del colegio sin manchas, lavada y lista para usar. Muy poco uso.',img:IMGS.shirt,status:'disponible',date:'19 jun 2026'},
+    {id:3,uid:3,title:'Pulso azul del colegio',cat:'pulso',size:'10',gender:'nino',desc:'Buzo talle 10 en excelente estado. Le queda grande a mi hijo y lo cambiamos.',img:IMGS.pulso1,status:'disponible',date:'18 jun 2026'},
+    {id:4,uid:1,title:'Pantalón talle 8 Primaria',cat:'pantalon',size:'8',gender:'nina',desc:'Pantalón de primaria talle 8. Buen estado, sin roturas.',img:IMGS.pantalon2,status:'disponible',date:'17 jun 2026'},
+    {id:5,uid:2,title:'Remera talle 4 Inicial',cat:'remera',size:'4',gender:'nina',desc:'Casi sin uso, perfecta para jardín. La compramos de más.',img:IMGS.remera2,status:'intercambiado',date:'15 jun 2026'},
   ],
   comments:[
     {id:1,iid:1,uid:2,type:'interesado',   text:'¡Me interesa mucho! Tengo una remera talle S para intercambiar si te sirve.',date:'21 jun'},
@@ -90,6 +90,10 @@ const state={
 const CAT={pantalon:{l:'Pantalón',i:'👖',bg:'bg-blue-50',text:'text-blue-700',dot:'#1d4ed8'},pulso:{l:'Pulso / Buzo',i:'🧥',bg:'bg-emerald-50',text:'text-emerald-700',dot:'#059669'},remera:{l:'Remera',i:'👕',bg:'bg-amber-50',text:'text-amber-700',dot:'#d97706'}};
 const INT={interesado:{i:'⭐',l:'Me interesa',cls:'text-green-700 bg-green-50 border border-green-200'},no_interesado:{i:'👎',l:'No me interesa',cls:'text-slate-600 bg-slate-50 border border-slate-200'},comentario:{i:'💬',l:'Comentario',cls:'text-blue-700 bg-blue-50 border border-blue-200'}};
 const ACOLORS=['#1e3270','#059669','#d97706','#7c3aed','#dc2626','#0891b2'];
+const SIZE_GROUPS={inicial:['0','2','4'],primaria:['6','8','10','12','14'],liceo:['16','XS','S','M','L','XL']};
+const SG_META={inicial:{label:'Inicial',color:'#7c3aed',bg:'#ede9fe'},primaria:{label:'Primaria',color:'#b45309',bg:'#fef3c7'},liceo:{label:'Liceo',color:'#0f766e',bg:'#ccfbf1'}};
+const GEN_META={nina:{label:'Niña',icon:'👧',color:'#be185d',bg:'#fce7f3'},nino:{label:'Niño',icon:'👦',color:'#0369a1',bg:'#e0f2fe'},unisex:{label:'Unisex',icon:'👤',color:'#7c3aed',bg:'#ede9fe'}};
+function getSizeGroup(size){if(SIZE_GROUPS.inicial.includes(size))return'inicial';if(SIZE_GROUPS.primaria.includes(size))return'primaria';if(SIZE_GROUPS.liceo.includes(size))return'liceo';return null;}
 const uname=id=>(state.users.find(u=>u.id===id)||{name:'?'}).name;
 const acolor=id=>ACOLORS[id%ACOLORS.length];
 const initials=n=>n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
@@ -145,7 +149,9 @@ function navbar(){
 // ── HOME ─────────────────────────────────────────────────────────────────────
 function renderHome(){
   const cats=['pantalon','pulso','remera'];
-  const list=state.cat?state.items.filter(i=>i.cat===state.cat):state.items;
+  let list=state.cat?state.items.filter(i=>i.cat===state.cat):state.items;
+  if(state.sizeGroup&&SIZE_GROUPS[state.sizeGroup])list=list.filter(i=>SIZE_GROUPS[state.sizeGroup].includes(i.size));
+  if(state.gender)list=list.filter(i=>i.gender===state.gender);
   const cards=list.map(item=>{
     const ic=icount(item.id),cc=icomments(item.id).length,c=CAT[item.cat];
     return`<button onclick="go('item',{selectedId:${item.id}})" class="text-left w-full" style="border:none;background:none;cursor:pointer">
@@ -167,6 +173,8 @@ function renderHome(){
           <span style="font-size:12px;color:#64748b;font-weight:500">${uname(item.uid)}</span>
         </div>
         <div style="border-top:1px solid #f1f5f9;padding-top:10px" class="flex items-center gap-3">
+          ${(()=>{const sg=getSizeGroup(item.size);return sg&&item.status!=='intercambiado'?`<span style="background:${SG_META[sg].bg};color:${SG_META[sg].color};border-radius:99px;padding:2px 8px;font-size:10px;font-weight:700">${SG_META[sg].label}</span>`:''})()}
+          ${item.gender&&item.gender!=='unisex'&&item.status!=='intercambiado'?`<span style="background:${GEN_META[item.gender].bg};color:${GEN_META[item.gender].color};border-radius:99px;padding:2px 8px;font-size:10px;font-weight:700">${GEN_META[item.gender].icon} ${GEN_META[item.gender].label}</span>`:''}
           ${item.status!=="intercambiado"?cdBadge(item.date):""}
           ${ic>0?`<span style="font-size:12px;font-weight:700;color:#16a34a">⭐ ${ic} interesado${ic!==1?'s':''}</span>`:''}
           ${cc>0?`<span style="font-size:12px;color:#94a3b8;font-weight:500">💬 ${cc}</span>`:`<span style="font-size:12px;color:#94a3b8">Sin comentarios</span>`}
@@ -189,9 +197,22 @@ function renderHome(){
     </div>
   </div>`:''}
   <div style="max-width:1200px;margin:0 auto;padding:28px 16px">
-    <div class="flex items-center gap-2 mb-7" style="overflow-x:auto;padding-bottom:4px">
-      <button onclick="state.cat=null;render()" class="filter-pill ${!state.cat?'active':''}">Todas las prendas</button>
-      ${['pantalon','pulso','remera'].map(c=>`<button onclick="state.cat='${c}';render()" class="filter-pill ${state.cat===c?'active':''}">${CAT[c].i} ${CAT[c].l}s</button>`).join('')}
+    <div style="background:#fff;border-radius:16px;border:1.5px solid #f1f5f9;padding:16px;margin-bottom:24px">
+      <div class="flex items-center gap-2 mb-3" style="overflow-x:auto">
+        <span style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;width:44px;flex-shrink:0">Tipo</span>
+        <button onclick="state.cat=null;render()" class="filter-pill ${!state.cat?'active':''}">Todas</button>
+        ${['pantalon','pulso','remera'].map(c=>`<button onclick="state.cat='${c}';render()" class="filter-pill ${state.cat===c?'active':''}">${CAT[c].i} ${CAT[c].l}</button>`).join('')}
+      </div>
+      <div class="flex items-center gap-2 mb-3" style="overflow-x:auto">
+        <span style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;width:44px;flex-shrink:0">Nivel</span>
+        <button onclick="state.sizeGroup=null;render()" class="filter-pill ${!state.sizeGroup?'active':''}">Todos</button>
+        ${['inicial','primaria','liceo'].map(sg=>`<button onclick="state.sizeGroup=state.sizeGroup==='${sg}'?null:'${sg}';render()" class="filter-pill ${state.sizeGroup===sg?'active':''}">${SG_META[sg].label}</button>`).join('')}
+      </div>
+      <div class="flex items-center gap-2" style="overflow-x:auto">
+        <span style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;width:44px;flex-shrink:0">Para</span>
+        <button onclick="state.gender=null;render()" class="filter-pill ${!state.gender?'active':''}">Todos</button>
+        ${['nina','nino','unisex'].map(g=>`<button onclick="state.gender=state.gender==='${g}'?null:'${g}';render()" class="filter-pill ${state.gender===g?'active':''}">${GEN_META[g].icon} ${g==='nina'?'Niñas':g==='nino'?'Niños':'Unisex'}</button>`).join('')}
+      </div>
     </div>
     ${list.length===0?`
     <div style="text-align:center;padding:80px 0">
@@ -275,10 +296,19 @@ function renderNew(){
       </div>
       <div style="margin-bottom:20px">
         <label style="font-size:13px;font-weight:700;color:#374151;display:block;margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px">Talle *</label>
-        <div style="display:flex;flex-wrap:wrap;gap:8px">
-          ${SIZES.map((s,i)=>`<button type="button" data-sz="${s}" onclick="selSz('${s}')" class="size-pill${i===3?' active':''}">${s}</button>`).join('')}
+        ${['inicial','primaria','liceo'].map(sg=>`
+        <div style="margin-bottom:12px">
+          <div style="margin-bottom:6px"><span style="font-size:10px;font-weight:800;color:${SG_META[sg].color};text-transform:uppercase;letter-spacing:.5px">${SG_META[sg].label}</span></div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">${SIZE_GROUPS[sg].map(s=>`<button type="button" data-sz="${s}" onclick="selSz('${s}')" class="size-pill${s==='M'?' active':''}">${s}</button>`).join('')}</div>
+        </div>`).join('')}
+        <input type="hidden" id="isz" value="M"/>
+      </div>
+      <div style="margin-bottom:20px">
+        <label style="font-size:13px;font-weight:700;color:#374151;display:block;margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px">Para *</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          ${['nina','nino','unisex'].map(g=>`<button type="button" data-gen="${g}" onclick="selGen('${g}')" style="display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;border:2px solid ${g==='unisex'?GEN_META[g].color:'#e2e8f0'};background:${g==='unisex'?GEN_META[g].bg:'#fff'};cursor:pointer;font-size:13px;font-weight:700;color:${g==='unisex'?GEN_META[g].color:'#64748b'};transition:all .12s" id="genbtn-${g}"><span style="font-size:20px">${GEN_META[g].icon}</span>${GEN_META[g].label}</button>`).join('')}
         </div>
-        <input type="hidden" id="isz" value="L"/>
+        <input type="hidden" id="igen" value="unisex"/>
       </div>
       <div style="margin-bottom:20px">
         <label style="font-size:13px;font-weight:700;color:#374151;display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">Descripción</label>
@@ -391,6 +421,8 @@ function renderItem(){
             <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
               <span class="tag" style="background:${c.bg.replace('bg-','')};font-size:12px">${c.i} ${c.l}</span>
               <span class="tag" style="background:#f1f5f9;color:#475569;font-size:12px">Talle ${item.size}</span>
+              ${(()=>{const sg=getSizeGroup(item.size);return sg?`<span class="tag" style="background:${SG_META[sg].bg};color:${SG_META[sg].color};font-size:12px">${SG_META[sg].label}</span>`:''})()}
+              ${item.gender&&GEN_META[item.gender]?`<span class="tag" style="background:${GEN_META[item.gender].bg};color:${GEN_META[item.gender].color};font-size:12px">${GEN_META[item.gender].icon} ${GEN_META[item.gender].label}</span>`:''}
             </div>
             ${item.status==="disponible"?cdBanner(item.date):""}
             <p style="font-size:14px;color:#475569;line-height:1.7;margin-bottom:20px">${item.desc}</p>
@@ -484,6 +516,7 @@ function bind(){
       title:document.getElementById('ititle').value.trim(),
       cat:document.getElementById('icat').value,
       size:document.getElementById('isz').value,
+      gender:document.getElementById('igen')?.value||'unisex',
       desc:document.getElementById('idesc').value.trim(),
       img:document.getElementById('iimg').value||IMGS[document.getElementById('icat').value+'1']||IMGS.remera1,
       status:'disponible',date:new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'})};
@@ -506,6 +539,16 @@ function selCat(c){
 function selSz(s){
   document.getElementById('isz').value=s;
   document.querySelectorAll('.size-pill').forEach(b=>b.classList.toggle('active',b.dataset.sz===s));
+}
+function selGen(g){
+  document.getElementById('igen').value=g;
+  ['nina','nino','unisex'].forEach(k=>{
+    const btn=document.getElementById('genbtn-'+k);if(!btn)return;
+    const active=k===g;
+    btn.style.borderColor=active?GEN_META[k].color:'#e2e8f0';
+    btn.style.background=active?GEN_META[k].bg:'#fff';
+    btn.style.color=active?GEN_META[k].color:'#64748b';
+  });
 }
 function selIt(t){
   document.getElementById('ctype').value=t;

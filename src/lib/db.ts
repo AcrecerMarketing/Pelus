@@ -33,6 +33,7 @@ function initializeDb(db: Database.Database) {
       title TEXT NOT NULL,
       category TEXT NOT NULL CHECK(category IN ('pantalon', 'pulso', 'remera')),
       size TEXT NOT NULL,
+      gender TEXT NOT NULL DEFAULT 'unisex' CHECK(gender IN ('nino', 'nina', 'unisex')),
       description TEXT DEFAULT '',
       image_data TEXT,
       status TEXT NOT NULL DEFAULT 'disponible' CHECK(status IN ('disponible', 'intercambiado')),
@@ -60,13 +61,14 @@ function initializeDb(db: Database.Database) {
     );
   `)
 
-  // Migration: add expires_at to existing tables that don't have it yet
+  // Migrations
   try {
     db.exec(`ALTER TABLE items ADD COLUMN expires_at TEXT`)
     db.exec(`UPDATE items SET expires_at = datetime(created_at, '+60 days') WHERE expires_at IS NULL`)
-  } catch {
-    // Column already exists — no-op
-  }
+  } catch { /* already exists */ }
+  try {
+    db.exec(`ALTER TABLE items ADD COLUMN gender TEXT DEFAULT 'unisex'`)
+  } catch { /* already exists */ }
 
   seedDb(db)
 }
@@ -84,27 +86,27 @@ function seedDb(db: Database.Database) {
   const u3Id = u3.lastInsertRowid as number
 
   const iStmt = db.prepare(
-    'INSERT INTO items (user_id, title, category, size, description) VALUES (?, ?, ?, ?, ?)'
+    'INSERT INTO items (user_id, title, category, size, gender, description) VALUES (?, ?, ?, ?, ?, ?)'
   )
   const i1 = iStmt.run(
-    u1Id, 'Pantalón verde del colegio', 'pantalon', 'M',
+    u1Id, 'Pantalón verde del colegio', 'pantalon', 'M', 'unisex',
     'En muy buen estado, usado solo un ciclo escolar. Sin roturas ni manchas.'
   )
   const i2 = iStmt.run(
-    u2Id, 'Remera amarilla con escudo Pablo Freire', 'remera', 'S',
+    u2Id, 'Remera amarilla con escudo Pablo Freire', 'remera', 'S', 'nina',
     'Remera del colegio sin manchas, lavada y lista para usar. Muy poco uso.'
   )
   const i3 = iStmt.run(
-    u3Id, 'Pulso azul del colegio', 'pulso', 'L',
-    'Buzo talle L, excelente estado, le queda grande a mi hijo ya.'
+    u3Id, 'Pulso azul del colegio', 'pulso', '10', 'nino',
+    'Buzo talle 10, excelente estado, le queda grande a mi hijo ya.'
   )
   iStmt.run(
-    u1Id, 'Pantalón talle grande', 'pantalon', 'XL',
-    'Pantalón usado dos años, buen estado, sin roturas.'
+    u1Id, 'Pantalón talle 8 Primaria', 'pantalon', '8', 'nina',
+    'Pantalón de primaria, buen estado, sin roturas. Talle 8.'
   )
   iStmt.run(
-    u2Id, 'Remera talle XS', 'remera', 'XS',
-    'Casi sin uso, perfecta para primer año.'
+    u2Id, 'Remera talle 4 Inicial', 'remera', '4', 'nina',
+    'Casi sin uso, perfecta para jardín. La compramos de más.'
   )
 
   const cStmt = db.prepare(
@@ -130,6 +132,7 @@ export interface Item {
   title: string
   category: 'pantalon' | 'pulso' | 'remera'
   size: string
+  gender: 'nino' | 'nina' | 'unisex'
   description: string
   image_data: string | null
   status: 'disponible' | 'intercambiado'
@@ -138,6 +141,19 @@ export interface Item {
   owner_name?: string
   comment_count?: number
   interest_count?: number
+}
+
+export const SIZE_GROUPS: Record<string, string[]> = {
+  inicial: ['0', '2', '4'],
+  primaria: ['6', '8', '10', '12', '14'],
+  liceo: ['16', 'XS', 'S', 'M', 'L', 'XL'],
+}
+
+export function getSizeGroupLabel(size: string): { label: string; key: string } | null {
+  if (SIZE_GROUPS.inicial.includes(size)) return { label: 'Inicial', key: 'inicial' }
+  if (SIZE_GROUPS.primaria.includes(size)) return { label: 'Primaria', key: 'primaria' }
+  if (SIZE_GROUPS.liceo.includes(size)) return { label: 'Liceo', key: 'liceo' }
+  return null
 }
 
 export interface Comment {
@@ -172,20 +188,31 @@ export const dbQueries = {
       .prepare('INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)')
       .run(data.name, data.email, data.password_hash),
 
-  getItems: (filter?: { category?: string }) => {
+  getItems: (filter?: { category?: string; sizeGroup?: string; gender?: string }) => {
     let q = `
-      SELECT i.id, i.user_id, i.title, i.category, i.size, i.description,
+      SELECT i.id, i.user_id, i.title, i.category, i.size, i.gender, i.description,
              i.image_data, i.status, i.created_at, i.expires_at, u.name as owner_name,
              COUNT(c.id) as comment_count,
              SUM(CASE WHEN c.interest_type = 'interesado' THEN 1 ELSE 0 END) as interest_count
       FROM items i
       JOIN users u ON i.user_id = u.id
       LEFT JOIN comments c ON c.item_id = i.id`
+    const conditions: string[] = []
     const params: unknown[] = []
     if (filter?.category) {
-      q += ' WHERE i.category = ?'
+      conditions.push('i.category = ?')
       params.push(filter.category)
     }
+    if (filter?.sizeGroup && SIZE_GROUPS[filter.sizeGroup]) {
+      const sizes = SIZE_GROUPS[filter.sizeGroup]
+      conditions.push(`i.size IN (${sizes.map(() => '?').join(',')})`)
+      params.push(...sizes)
+    }
+    if (filter?.gender) {
+      conditions.push('i.gender = ?')
+      params.push(filter.gender)
+    }
+    if (conditions.length > 0) q += ' WHERE ' + conditions.join(' AND ')
     q += ' GROUP BY i.id ORDER BY i.created_at DESC'
     return getDb().prepare(q).all(...params) as Item[]
   },
@@ -223,14 +250,15 @@ export const dbQueries = {
     title: string
     category: string
     size: string
+    gender: string
     description: string
     image_data: string | null
   }) =>
     getDb()
       .prepare(
-        'INSERT INTO items (user_id, title, category, size, description, image_data) VALUES (?, ?, ?, ?, ?, ?)'
+        'INSERT INTO items (user_id, title, category, size, gender, description, image_data) VALUES (?, ?, ?, ?, ?, ?, ?)'
       )
-      .run(data.user_id, data.title, data.category, data.size, data.description, data.image_data),
+      .run(data.user_id, data.title, data.category, data.size, data.gender, data.description, data.image_data),
 
   markItemAsExchanged: (id: number) =>
     getDb().prepare("UPDATE items SET status = 'intercambiado' WHERE id = ?").run(id),

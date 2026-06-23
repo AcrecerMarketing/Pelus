@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 import { verifyToken } from '@/lib/auth'
-import { dbQueries } from '@/lib/db'
+import { dbQueries, getSizeGroupLabel } from '@/lib/db'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import { notFound } from 'next/navigation'
@@ -21,6 +21,16 @@ const CATEGORY_COLORS: Record<string, string> = {
   pantalon: 'bg-blue-100 text-blue-700',
   pulso: 'bg-emerald-100 text-emerald-700',
   remera: 'bg-orange-100 text-orange-700',
+}
+const SIZE_GROUP_COLORS: Record<string, string> = {
+  inicial: 'bg-violet-100 text-violet-700',
+  primaria: 'bg-amber-100 text-amber-700',
+  liceo: 'bg-teal-100 text-teal-700',
+}
+const GENDER_META: Record<string, { label: string; icon: string; color: string }> = {
+  nina: { label: 'Niña', icon: '👧', color: 'bg-pink-100 text-pink-700' },
+  nino: { label: 'Niño', icon: '👦', color: 'bg-sky-100 text-sky-700' },
+  unisex: { label: 'Unisex', icon: '👤', color: 'bg-purple-100 text-purple-700' },
 }
 const INTEREST_CONFIG: Record<string, { icon: string; label: string; color: string }> = {
   interesado: { icon: '⭐', label: 'Me interesa', color: 'text-green-700 bg-green-100' },
@@ -50,6 +60,8 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
 
   const daysLeft = getDaysLeft(item.expires_at)
   const isExpired = daysLeft <= 0
+  const sizeGroup = getSizeGroupLabel(item.size)
+  const genderMeta = item.gender ? GENDER_META[item.gender] : null
 
   const expiryDate = item.expires_at
     ? new Date(item.expires_at.replace(' ', 'T') + 'Z').toLocaleDateString('es-AR', {
@@ -153,6 +165,16 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
                 <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
                   Talle {item.size}
                 </span>
+                {sizeGroup && (
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${SIZE_GROUP_COLORS[sizeGroup.key]}`}>
+                    {sizeGroup.label}
+                  </span>
+                )}
+                {genderMeta && (
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${genderMeta.color}`}>
+                    {genderMeta.icon} {genderMeta.label}
+                  </span>
+                )}
               </div>
 
               {item.description && (

@@ -5,7 +5,9 @@ import { dbQueries } from '@/lib/db'
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const category = searchParams.get('category') || undefined
-  const items = dbQueries.getItems(category ? { category } : undefined)
+  const sizeGroup = searchParams.get('sizeGroup') || undefined
+  const gender = searchParams.get('gender') || undefined
+  const items = dbQueries.getItems({ category, sizeGroup, gender })
   return NextResponse.json(items)
 }
 
@@ -16,7 +18,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { title, category, size, description, image_data } = await request.json()
+    const { title, category, size, gender, description, image_data } = await request.json()
 
     if (!title?.trim() || !category || !size) {
       return NextResponse.json(
@@ -29,11 +31,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Categoría inválida' }, { status: 400 })
     }
 
+    const validGender = ['nino', 'nina', 'unisex'].includes(gender) ? gender : 'unisex'
+
     const result = dbQueries.createItem({
       user_id: session.userId,
       title: title.trim(),
       category,
       size,
+      gender: validGender,
       description: description?.trim() || '',
       image_data: image_data || null,
     })

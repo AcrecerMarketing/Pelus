@@ -9,7 +9,38 @@ const CATEGORIES = [
   { value: 'remera', label: 'Remera', icon: '👕' },
 ]
 
-const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '6', '8', '10', '12', '14', '16']
+const SIZE_GROUPS = [
+  {
+    key: 'inicial',
+    label: 'Inicial',
+    sublabel: 'Jardín (2° y 3°)',
+    sizes: ['0', '2', '4'],
+    color: 'text-violet-700',
+    activeBg: 'border-violet-500 bg-violet-500 text-white',
+  },
+  {
+    key: 'primaria',
+    label: 'Primaria',
+    sublabel: '1° a 5° año',
+    sizes: ['6', '8', '10', '12', '14'],
+    color: 'text-amber-700',
+    activeBg: 'border-amber-500 bg-amber-500 text-white',
+  },
+  {
+    key: 'liceo',
+    label: 'Liceo',
+    sublabel: '6° en adelante',
+    sizes: ['16', 'XS', 'S', 'M', 'L', 'XL'],
+    color: 'text-teal-700',
+    activeBg: 'border-teal-500 bg-teal-500 text-white',
+  },
+]
+
+const GENDERS = [
+  { value: 'nina', label: 'Niña', icon: '👧', color: 'border-pink-400 bg-pink-400 text-white' },
+  { value: 'nino', label: 'Niño', icon: '👦', color: 'border-sky-400 bg-sky-400 text-white' },
+  { value: 'unisex', label: 'Unisex', icon: '👤', color: 'border-purple-400 bg-purple-400 text-white' },
+]
 
 export default function NewItemForm() {
   const router = useRouter()
@@ -18,6 +49,7 @@ export default function NewItemForm() {
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState('remera')
   const [size, setSize] = useState('M')
+  const [gender, setGender] = useState('unisex')
   const [description, setDescription] = useState('')
   const [imageData, setImageData] = useState<string | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -65,7 +97,7 @@ export default function NewItemForm() {
     const res = await fetch('/api/items', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, category, size, description, image_data: imageData }),
+      body: JSON.stringify({ title, category, size, gender, description, image_data: imageData }),
     })
 
     if (res.ok) {
@@ -80,6 +112,7 @@ export default function NewItemForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Category */}
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-2">Tipo de prenda *</label>
         <div className="grid grid-cols-3 gap-3">
@@ -90,14 +123,14 @@ export default function NewItemForm() {
               onClick={() => setCategory(cat.value)}
               className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition ${
                 category === cat.value
-                  ? 'border-blue-600 bg-blue-50'
+                  ? 'border-green-600 bg-green-50'
                   : 'border-gray-200 hover:border-gray-300'
               }`}
             >
               <span className="text-3xl">{cat.icon}</span>
               <span
                 className={`text-xs font-semibold ${
-                  category === cat.value ? 'text-blue-700' : 'text-gray-500'
+                  category === cat.value ? 'text-green-700' : 'text-gray-500'
                 }`}
               >
                 {cat.label}
@@ -107,6 +140,7 @@ export default function NewItemForm() {
         </div>
       </div>
 
+      {/* Title */}
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-1">Título *</label>
         <input
@@ -115,31 +149,67 @@ export default function NewItemForm() {
           onChange={(e) => setTitle(e.target.value)}
           required
           maxLength={100}
-          className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Ej: Pantalón azul marino talle M, buen estado"
+          className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+          placeholder="Ej: Pantalón verde talle 10, buen estado"
         />
       </div>
 
+      {/* Size groups */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">Talle *</label>
-        <div className="flex flex-wrap gap-2">
-          {SIZES.map((s) => (
+        <label className="block text-sm font-semibold text-gray-700 mb-3">Talle *</label>
+        <div className="space-y-4">
+          {SIZE_GROUPS.map((group) => (
+            <div key={group.key}>
+              <div className="flex items-baseline gap-2 mb-2">
+                <span className={`text-xs font-bold uppercase tracking-wider ${group.color}`}>
+                  {group.label}
+                </span>
+                <span className="text-xs text-gray-400">{group.sublabel}</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {group.sizes.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setSize(s)}
+                    className={`min-w-[44px] h-10 px-3 rounded-lg text-sm font-semibold border-2 transition ${
+                      size === s
+                        ? group.activeBg
+                        : 'border-gray-200 text-gray-600 hover:border-gray-400'
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Gender */}
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-2">Para *</label>
+        <div className="flex gap-3 flex-wrap">
+          {GENDERS.map((g) => (
             <button
-              key={s}
+              key={g.value}
               type="button"
-              onClick={() => setSize(s)}
-              className={`w-12 h-10 rounded-lg text-sm font-semibold border-2 transition ${
-                size === s
-                  ? 'border-blue-600 bg-blue-600 text-white'
-                  : 'border-gray-200 text-gray-600 hover:border-blue-300'
+              onClick={() => setGender(g.value)}
+              className={`flex items-center gap-2 px-5 py-3 rounded-xl border-2 font-semibold text-sm transition ${
+                gender === g.value
+                  ? g.color
+                  : 'border-gray-200 text-gray-600 hover:border-gray-300'
               }`}
             >
-              {s}
+              <span className="text-xl">{g.icon}</span>
+              {g.label}
             </button>
           ))}
         </div>
       </div>
 
+      {/* Description */}
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-1">Descripción</label>
         <textarea
@@ -147,12 +217,13 @@ export default function NewItemForm() {
           onChange={(e) => setDescription(e.target.value)}
           rows={4}
           maxLength={500}
-          className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+          className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
           placeholder="Describí el estado de la prenda, cuánto tiempo fue usada, si tiene algún desgaste, etc."
         />
         <p className="text-xs text-gray-400 mt-1 text-right">{description.length}/500</p>
       </div>
 
+      {/* Photo */}
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-2">
           Foto de la prenda
@@ -160,7 +231,7 @@ export default function NewItemForm() {
         <div
           onClick={() => fileInputRef.current?.click()}
           className={`border-2 border-dashed rounded-xl cursor-pointer transition overflow-hidden ${
-            imagePreview ? 'border-blue-300' : 'border-gray-300 hover:border-blue-400'
+            imagePreview ? 'border-green-300' : 'border-gray-300 hover:border-green-400'
           }`}
         >
           {imagePreview ? (
@@ -203,7 +274,7 @@ export default function NewItemForm() {
       <button
         type="submit"
         disabled={loading || !title.trim()}
-        className="w-full bg-blue-700 text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-800 transition disabled:opacity-50"
+        className="w-full bg-green-800 text-white py-4 rounded-xl font-bold text-lg hover:bg-green-900 transition disabled:opacity-50"
       >
         {loading ? 'Publicando...' : '✓ Publicar prenda'}
       </button>
