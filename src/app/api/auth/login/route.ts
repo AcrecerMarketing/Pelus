@@ -5,53 +5,34 @@ import { signToken } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { email, password } = body
+    const { email, password } = await request.json()
 
     if (!email || !password) {
-      return NextResponse.json({ error: 'Email y contraseña son requeridos' }, { status: 400 })
+      return NextResponse.json({ error: 'Email y contraseña requeridos' }, { status: 400 })
     }
 
-    const user = dbQueries.getUserByEmail(email)
+    const user = dbQueries.getUserByEmail(email.toLowerCase())
     if (!user) {
-      return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 })
+      return NextResponse.json({ error: 'Email o contraseña incorrectos' }, { status: 401 })
     }
 
-    const passwordValid = await bcrypt.compare(password, user.password_hash)
-    if (!passwordValid) {
-      return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 })
+    const valid = await bcrypt.compare(password, user.password_hash)
+    if (!valid) {
+      return NextResponse.json({ error: 'Email o contraseña incorrectos' }, { status: 401 })
     }
 
-    const token = await signToken({
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-      salonId: user.salon_id,
-      name: user.name,
-    })
+    const token = await signToken({ userId: user.id, email: user.email, name: user.name })
 
-    const response = NextResponse.json({
-      success: true,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        salonId: user.salon_id,
-      },
-    })
-
+    const response = NextResponse.json({ success: true })
     response.cookies.set('session', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7,
       path: '/',
     })
-
     return response
   } catch (error) {
     console.error('Login error:', error)
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+    return NextResponse.json({ error: 'Error al iniciar sesión' }, { status: 500 })
   }
 }

@@ -1,14 +1,13 @@
 import { SignJWT, jwtVerify } from 'jose'
 import { NextRequest } from 'next/server'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'salon-super-secret-key-change-in-production'
+const JWT_SECRET =
+  process.env.JWT_SECRET || 'pelus-exchange-secret-key-change-in-production'
 const secret = new TextEncoder().encode(JWT_SECRET)
 
 export interface JWTPayload {
   userId: number
   email: string
-  role: 'owner' | 'admin' | 'employee'
-  salonId: number
   name: string
 }
 

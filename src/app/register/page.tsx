@@ -4,8 +4,9 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter()
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -16,10 +17,10 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
 
-    const res = await fetch('/api/auth/login', {
+    const res = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ name, email, password }),
     })
 
     if (res.ok) {
@@ -27,7 +28,7 @@ export default function LoginPage() {
       router.refresh()
     } else {
       const data = await res.json()
-      setError(data.error || 'Error al iniciar sesión')
+      setError(data.error || 'Error al registrarse')
     }
     setLoading(false)
   }
@@ -37,7 +38,7 @@ export default function LoginPage() {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
         <div className="text-center mb-8">
           <div className="text-5xl mb-3">👕</div>
-          <h1 className="text-2xl font-bold text-blue-800">Bienvenido</h1>
+          <h1 className="text-2xl font-bold text-blue-800">Crear cuenta</h1>
           <p className="text-gray-500 text-sm mt-1">
             Intercambio de Uniformes
             <br />
@@ -46,6 +47,17 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Tu nombre y apellido"
+            />
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
@@ -64,8 +76,9 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              minLength={6}
               className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="••••••••"
+              placeholder="Mínimo 6 caracteres"
             />
           </div>
 
@@ -80,25 +93,16 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full bg-blue-700 text-white py-3 rounded-xl font-semibold hover:bg-blue-800 transition disabled:opacity-50 mt-2"
           >
-            {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+            {loading ? 'Creando cuenta...' : 'Crear cuenta'}
           </button>
         </form>
 
         <p className="text-center text-sm text-gray-600 mt-6">
-          ¿No tenés cuenta?{' '}
-          <Link href="/register" className="text-blue-600 font-semibold hover:underline">
-            Registrate
+          ¿Ya tenés cuenta?{' '}
+          <Link href="/login" className="text-blue-600 font-semibold hover:underline">
+            Iniciá sesión
           </Link>
         </p>
-
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <p className="text-xs text-gray-400 text-center mb-2">Cuentas de demo:</p>
-          <div className="space-y-1 text-xs text-gray-500 text-center">
-            <div>maria@demo.com / demo123</div>
-            <div>carlos@demo.com / demo123</div>
-            <div>lucia@demo.com / demo123</div>
-          </div>
-        </div>
       </div>
     </div>
   )
