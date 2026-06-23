@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Intercambio de Uniformes — Colegio Pablo Freire</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']},colors:{navy:{50:'#eff6ff',100:'#dbeafe',600:'#1d4ed8',700:'#1e3a8a',800:'#1e3270',900:'#172554'}},boxShadow:{card:'0 2px 8px rgba(0,0,0,.06),0 0 0 1px rgba(0,0,0,.04)','card-hover':'0 8px 24px rgba(0,0,0,.12),0 0 0 1px rgba(0,0,0,.06)'}}}}}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#f8fafc}
+.page{animation:fadeUp .22s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.card{transition:transform .18s ease,box-shadow .18s ease}
+.card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.13)}
+input:focus,textarea:focus{outline:none;box-shadow:0 0 0 3px rgba(59,130,246,.18)}
+.badge{font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.avatar{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;font-weight:700;font-size:13px;color:#fff;flex-shrink:0}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:9px}
+.tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:600}
+.btn-primary{background:#1e3270;color:#fff;border:none;border-radius:12px;padding:12px 24px;font-weight:700;font-size:14px;cursor:pointer;transition:background .15s}
+.btn-primary:hover{background:#172554}
+.btn-outline{background:transparent;border:2px solid #e2e8f0;border-radius:12px;padding:10px 20px;font-weight:600;font-size:14px;cursor:pointer;color:#475569;transition:border-color .15s,background .15s}
+.btn-outline:hover{border-color:#94a3b8;background:#f8fafc}
+.img-container{position:relative;overflow:hidden;background:#e2e8f0}
+.img-container img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
+.card:hover .img-container img{transform:scale(1.04)}
+.notif-dot{position:absolute;top:-3px;right:-3px;background:#ef4444;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;border:2px solid white}
+.input-field{width:100%;border:1.5px solid #e2e8f0;border-radius:12px;padding:13px 16px;font-size:14px;font-family:'Inter',sans-serif;background:#fff;transition:border-color .15s}
+.input-field:focus{border-color:#3b82f6}
+.cat-pill{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 12px;border-radius:14px;border:2px solid #e2e8f0;cursor:pointer;transition:all .15s;background:#fff}
+.cat-pill.active{border-color:#1e3270;background:#eff6ff}
+.size-pill{width:44px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:10px;border:2px solid #e2e8f0;font-size:13px;font-weight:700;cursor:pointer;transition:all .12s;color:#64748b}
+.size-pill.active{border-color:#1e3270;background:#1e3270;color:#fff}
+.int-btn{padding:8px 16px;border-radius:99px;border:2px solid #e2e8f0;font-size:13px;font-weight:600;cursor:pointer;background:#fff;color:#64748b;transition:all .12s}
+.int-btn.active-int{border-color:#16a34a;background:#f0fdf4;color:#15803d}
+.int-btn.active-com{border-color:#2563eb;background:#eff6ff;color:#1d4ed8}
+.int-btn.active-noint{border-color:#94a3b8;background:#f8fafc;color:#64748b}
+.comment-card{background:#fff;border-radius:14px;padding:16px;border:1.5px solid #f1f5f9;transition:border-color .12s}
+.comment-card:hover{border-color:#e2e8f0}
+.hero-gradient{background:linear-gradient(135deg,#1e3270 0%,#1d4ed8 50%,#2563eb 100%)}
+.filter-pill{padding:8px 18px;border-radius:99px;font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid #e2e8f0;background:#fff;color:#64748b;transition:all .12s;white-space:nowrap}
+.filter-pill.active{background:#1e3270;color:#fff;border-color:#1e3270}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ── DATA ────────────────────────────────────────────────────────────────────
+const IMGS={
+  pantalon1:'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=600&q=80',
+  pantalon2:'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=600&q=80',
+  remera1:'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=600&q=80',
+  remera2:'https://images.unsplash.com/photo-1503341504253-dff4815485f1?auto=format&fit=crop&w=600&q=80',
+  pulso1:'https://images.unsplash.com/photo-1556821840-3a63f15732ce?auto=format&fit=crop&w=600&q=80',
+};
+
+const state={
+  page:'home', selectedId:null, session:null, cat:null,
+  nextId:6, nextCid:5, nextNid:1,
+  users:[
+    {id:1,name:'María González',  email:'maria@demo.com', pass:'demo123'},
+    {id:2,name:'Carlos Rodríguez',email:'carlos@demo.com',pass:'demo123'},
+    {id:3,name:'Lucía Fernández', email:'lucia@demo.com', pass:'demo123'},
+  ],
+  items:[
+    {id:1,uid:1,title:'Pantalón escolar azul marino',cat:'pantalon',size:'M',desc:'En muy buen estado, usado solo un ciclo escolar. Sin roturas ni manchas. La cintura elástica está perfecta.',img:IMGS.pantalon1,status:'disponible',date:'20 jun 2026'},
+    {id:2,uid:2,title:'Remera polo blanca oficial', cat:'remera',  size:'S',desc:'Remera blanca sin manchas, lavada y lista para usar. Muy poco uso, apenas se nota que fue usada.',img:IMGS.remera1,status:'disponible',date:'19 jun 2026'},
+    {id:3,uid:3,title:'Pulso azul del colegio',     cat:'pulso',   size:'L',desc:'Buzo talle L en excelente estado. Le queda grande a mi hijo y lo cambiamos por talle M.',img:IMGS.pulso1,status:'disponible',date:'18 jun 2026'},
+    {id:4,uid:1,title:'Pantalón talle XL',           cat:'pantalon',size:'XL',desc:'Pantalón usado dos años, buen estado general. Ideal para alumno de último año.',img:IMGS.pantalon2,status:'disponible',date:'17 jun 2026'},
+    {id:5,uid:2,title:'Remera polo talle XS',         cat:'remera',  size:'XS',desc:'Casi sin uso, perfecta para primer año. La compré de más y nunca la usamos.',img:IMGS.remera2,status:'intercambiado',date:'15 jun 2026'},
+  ],
+  comments:[
+    {id:1,iid:1,uid:2,type:'interesado',   text:'¡Me interesa mucho! Tengo una remera talle S para intercambiar si te sirve.',date:'21 jun'},
+    {id:2,iid:1,uid:3,type:'comentario',   text:'¿Cuál es el estado de la cintura elástica? ¿Sigue firme?',date:'21 jun'},
+    {id:3,iid:2,uid:1,type:'interesado',   text:'Perfecto, justo lo que necesitaba para mi hija. ¡Muy interesada!',date:'20 jun'},
+    {id:4,iid:3,uid:2,type:'no_interesado',text:'No me sirve el talle, necesito M. Gracias igual.',date:'19 jun'},
+  ],
+  notifs:[],
+};
+
+// ── HELPERS ─────────────────────────────────────────────────────────────────
+const CAT={pantalon:{l:'Pantalón',i:'👖',bg:'bg-blue-50',text:'text-blue-700',dot:'#1d4ed8'},pulso:{l:'Pulso / Buzo',i:'🧥',bg:'bg-emerald-50',text:'text-emerald-700',dot:'#059669'},remera:{l:'Remera',i:'👕',bg:'bg-amber-50',text:'text-amber-700',dot:'#d97706'}};
+const INT={interesado:{i:'⭐',l:'Me interesa',cls:'text-green-700 bg-green-50 border border-green-200'},no_interesado:{i:'👎',l:'No me interesa',cls:'text-slate-600 bg-slate-50 border border-slate-200'},comentario:{i:'💬',l:'Comentario',cls:'text-blue-700 bg-blue-50 border border-blue-200'}};
+const ACOLORS=['#1e3270','#059669','#d97706','#7c3aed','#dc2626','#0891b2'];
+const uname=id=>(state.users.find(u=>u.id===id)||{name:'?'}).name;
+const acolor=id=>ACOLORS[id%ACOLORS.length];
+const initials=n=>n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+const icomments=id=>state.comments.filter(c=>c.iid===id);
+const icount=id=>state.comments.filter(c=>c.iid===id&&c.type==='interesado').length;
+const unread=()=>state.notifs.filter(n=>!n.read&&n.uid===state.session?.id).length;
+const go=(page,extra={})=>{Object.assign(state,{page,...extra});render();scrollTo(0,0)};
+const fmt=d=>d instanceof Date?d.toLocaleDateString('es-AR',{day:'2-digit',month:'short'}):d;
+
+// ── AVATAR ──────────────────────────────────────────────────────────────────
+const av=(uid,size=32)=>`<span class="avatar" style="width:${size}px;height:${size}px;background:${acolor(uid)};font-size:${size*.4}px">${initials(uname(uid))}</span>`;
+
+// ── NAVBAR ───────────────────────────────────────────────────────────────────
+function navbar(){
+  const uc=unread();
+  return`<nav style="background:linear-gradient(90deg,#1a3260,#1e3a8a)" class="sticky top-0 z-50 shadow-lg">
+  <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
+    <button onclick="go('home')" class="flex items-center gap-2.5 text-left">
+      <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:6px 8px;font-size:20px">👕</div>
+      <div><div class="font-800 text-white text-sm font-extrabold leading-tight">Intercambio de Uniformes</div><div style="color:rgba(255,255,255,.55);font-size:11px;font-weight:500">Colegio Pablo Freire</div></div>
+    </button>
+    <div class="flex items-center gap-2">
+    ${state.session?`
+      <button onclick="go('new')" style="background:#f5a623;color:#1a3260;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:800;border:none;cursor:pointer" class="hidden sm:block hover:opacity-90 transition">+ Publicar</button>
+      <button onclick="go('notifs')" class="relative" style="background:rgba(255,255,255,.12);border:none;border-radius:10px;padding:7px 10px;cursor:pointer;color:white;font-size:17px">${uc>0?`<span class="notif-dot">${uc>9?'9+':uc}</span>`:''}🔔</button>
+      <div class="flex items-center gap-2">${av(state.session.id,32)}<span style="color:rgba(255,255,255,.7);font-size:12px;font-weight:500" class="hidden sm:block max-w-[90px] truncate">${state.session.name.split(' ')[0]}</span><button onclick="state.session=null;go('home')" style="color:rgba(255,255,255,.5);background:none;border:none;cursor:pointer;font-size:12px;font-weight:600;text-decoration:underline">Salir</button></div>
+    `:`
+      <button onclick="go('login')" style="color:rgba(255,255,255,.75);background:none;border:none;cursor:pointer;font-size:13px;font-weight:600">Iniciar sesión</button>
+      <button onclick="go('register')" style="background:white;color:#1a3260;border:none;border-radius:10px;padding:7px 16px;font-size:13px;font-weight:800;cursor:pointer" class="hover:opacity-90 transition">Registrarse</button>
+    `}
+    </div>
+  </div></nav>`}
+
+// ── HOME ─────────────────────────────────────────────────────────────────────
+function renderHome(){
+  const cats=['pantalon','pulso','remera'];
+  const list=state.cat?state.items.filter(i=>i.cat===state.cat):state.items;
+  const cards=list.map(item=>{
+    const ic=icount(item.id),cc=icomments(item.id).length,c=CAT[item.cat];
+    return`<button onclick="go('item',{selectedId:${item.id}})" class="text-left w-full" style="border:none;background:none;cursor:pointer">
+    <div class="card bg-white rounded-2xl overflow-hidden" style="box-shadow:0 2px 8px rgba(0,0,0,.07)">
+      <div class="img-container" style="height:220px;position:relative">
+        <img src="${item.img}" alt="${item.title}" loading="lazy" style="width:100%;height:100%;object-fit:cover"/>
+        <div style="position:absolute;top:10px;right:10px">
+          <span class="tag" style="background:rgba(255,255,255,.92);backdrop-filter:blur(8px);color:#1a3260;font-size:11px;font-weight:700">${c.i} ${c.l}</span>
+        </div>
+        ${item.status==='intercambiado'?`<div style="position:absolute;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center"><span style="background:white;color:#1e293b;padding:6px 16px;border-radius:99px;font-size:12px;font-weight:800">✓ Intercambiado</span></div>`:''}
+      </div>
+      <div style="padding:14px 16px 16px">
+        <div class="flex items-start justify-between gap-2 mb-2">
+          <h3 style="font-size:14px;font-weight:700;color:#0f172a;line-height:1.4" class="line-clamp-2">${item.title}</h3>
+          <span style="background:#f1f5f9;color:#475569;border-radius:8px;padding:3px 8px;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0">T. ${item.size}</span>
+        </div>
+        <div class="flex items-center gap-1.5 mb-3">
+          ${av(item.uid,20)}
+          <span style="font-size:12px;color:#64748b;font-weight:500">${uname(item.uid)}</span>
+        </div>
+        <div style="border-top:1px solid #f1f5f9;padding-top:10px" class="flex items-center gap-3">
+          ${ic>0?`<span style="font-size:12px;font-weight:700;color:#16a34a">⭐ ${ic} interesado${ic!==1?'s':''}</span>`:''}
+          ${cc>0?`<span style="font-size:12px;color:#94a3b8;font-weight:500">💬 ${cc}</span>`:`<span style="font-size:12px;color:#94a3b8">Sin comentarios</span>`}
+        </div>
+      </div>
+    </div></button>`}).join('');
+
+  return`<div class="page">
+  ${navbar()}
+  ${!state.session?`
+  <div class="hero-gradient" style="padding:56px 16px">
+    <div style="max-width:640px;margin:0 auto;text-align:center">
+      <div style="display:inline-flex;background:rgba(255,255,255,.12);border-radius:16px;padding:12px 20px;gap:12px;font-size:32px;margin-bottom:20px">👕 👖 🧥</div>
+      <h1 style="font-size:32px;font-weight:900;color:#fff;line-height:1.2;margin-bottom:12px">Intercambiá uniformes del<br/>Colegio Pablo Freire</h1>
+      <p style="color:rgba(255,255,255,.7);font-size:16px;margin-bottom:32px;line-height:1.6">Publicá las prendas que ya no usás y encontrá lo que necesitás. ¡Ahorrá y ayudá a otros alumnos!</p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button onclick="go('register')" style="background:#f5a623;color:#1a3260;border:none;border-radius:12px;padding:13px 28px;font-size:15px;font-weight:800;cursor:pointer" class="hover:opacity-90 transition">Registrarse gratis</button>
+        <button onclick="go('login')" style="background:rgba(255,255,255,.12);color:white;border:2px solid rgba(255,255,255,.35);border-radius:12px;padding:11px 28px;font-size:15px;font-weight:700;cursor:pointer" class="hover:opacity-90 transition">Iniciar sesión</button>
+      </div>
+    </div>
+  </div>`:''}
+  <div style="max-width:1200px;margin:0 auto;padding:28px 16px">
+    <div class="flex items-center gap-2 mb-7" style="overflow-x:auto;padding-bottom:4px">
+      <button onclick="state.cat=null;render()" class="filter-pill ${!state.cat?'active':''}">Todas las prendas</button>
+      ${['pantalon','pulso','remera'].map(c=>`<button onclick="state.cat='${c}';render()" class="filter-pill ${state.cat===c?'active':''}">${CAT[c].i} ${CAT[c].l}s</button>`).join('')}
+    </div>
+    ${list.length===0?`
+    <div style="text-align:center;padding:80px 0">
+      <div style="font-size:56px;margin-bottom:16px">👔</div>
+      <h3 style="font-size:18px;font-weight:700;color:#1e293b;margin-bottom:8px">No hay prendas en esta categoría</h3>
+      ${state.session?`<button onclick="go('new')" class="btn-primary" style="margin-top:16px">+ Publicar prenda</button>`:''}
+    </div>
+    `:`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px">${cards}</div>`}
+  </div></div>`}
+
+// ── AUTH PAGES ───────────────────────────────────────────────────────────────
+function authShell(content){return`<div class="page" style="min-height:100vh;background:linear-gradient(135deg,#172554,#1d4ed8);display:flex;align-items:center;justify-content:center;padding:16px">
+<div style="background:white;border-radius:24px;box-shadow:0 25px 60px rgba(0,0,0,.25);width:100%;max-width:420px;padding:40px">
+${content}</div></div>`}
+
+function renderLogin(){return authShell(`
+  <div style="text-align:center;margin-bottom:28px">
+    <div style="font-size:48px;margin-bottom:12px">👕</div>
+    <h1 style="font-size:22px;font-weight:800;color:#0f172a;margin-bottom:4px">Bienvenido</h1>
+    <p style="color:#64748b;font-size:13px">Intercambio de Uniformes · Colegio Pablo Freire</p>
+  </div>
+  <form id="lf" class="space-y-4">
+    <div><label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:5px">Email</label>
+    <input id="le" type="email" class="input-field" value="maria@demo.com" required/></div>
+    <div><label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:5px">Contraseña</label>
+    <input id="lp" type="password" class="input-field" value="demo123" required/></div>
+    <div id="lerr" style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:10px;padding:10px 14px;font-size:13px"></div>
+    <button type="submit" class="btn-primary" style="width:100%;margin-top:8px">Iniciar sesión</button>
+  </form>
+  <p style="text-align:center;font-size:13px;color:#64748b;margin-top:20px">¿No tenés cuenta? <button onclick="go('register')" style="color:#1d4ed8;font-weight:700;background:none;border:none;cursor:pointer">Registrate</button></p>
+  <div style="border-top:1px solid #f1f5f9;margin-top:20px;padding-top:16px;text-align:center">
+    <p style="font-size:11px;color:#94a3b8;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Cuentas de demo</p>
+    ${state.users.map(u=>`<div style="font-size:12px;color:#64748b;margin-bottom:3px">${u.email} / ${u.pass}</div>`).join('')}
+  </div>`)}
+
+function renderRegister(){return authShell(`
+  <div style="text-align:center;margin-bottom:28px">
+    <div style="font-size:48px;margin-bottom:12px">👕</div>
+    <h1 style="font-size:22px;font-weight:800;color:#0f172a;margin-bottom:4px">Crear cuenta</h1>
+    <p style="color:#64748b;font-size:13px">Intercambio de Uniformes · Colegio Pablo Freire</p>
+  </div>
+  <form id="rf" class="space-y-4">
+    <div><label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:5px">Nombre completo</label>
+    <input id="rn" type="text" class="input-field" placeholder="Tu nombre y apellido" required/></div>
+    <div><label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:5px">Email</label>
+    <input id="re" type="email" class="input-field" placeholder="tu@email.com" required/></div>
+    <div><label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:5px">Contraseña</label>
+    <input id="rp" type="password" class="input-field" placeholder="Mínimo 6 caracteres" minlength="6" required/></div>
+    <div id="rerr" style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:10px;padding:10px 14px;font-size:13px"></div>
+    <button type="submit" class="btn-primary" style="width:100%;margin-top:8px">Crear cuenta</button>
+  </form>
+  <p style="text-align:center;font-size:13px;color:#64748b;margin-top:20px">¿Ya tenés cuenta? <button onclick="go('login')" style="color:#1d4ed8;font-weight:700;background:none;border:none;cursor:pointer">Iniciá sesión</button></p>`)}
+
+// ── NEW ITEM ─────────────────────────────────────────────────────────────────
+function renderNew(){
+  if(!state.session){go('login');return''}
+  const SIZES=['XS','S','M','L','XL','XXL','6','8','10','12','14','16'];
+  return`<div class="page"><div style="min-height:100vh;background:#f8fafc">
+  ${navbar()}
+  <div style="max-width:640px;margin:0 auto;padding:32px 16px">
+    <div style="margin-bottom:24px">
+      <h1 style="font-size:24px;font-weight:800;color:#0f172a;margin-bottom:4px">Publicar prenda</h1>
+      <p style="color:#64748b;font-size:14px">Completá los datos de la prenda que querés intercambiar.</p>
+    </div>
+    <div style="background:white;border-radius:20px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,.06)">
+    <form id="nf">
+      <div style="margin-bottom:22px">
+        <label style="font-size:13px;font-weight:700;color:#374151;display:block;margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px">Tipo de prenda</label>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+          ${['pantalon','pulso','remera'].map((c,i)=>`
+          <button type="button" data-cat="${c}" onclick="selCat('${c}')" class="cat-pill${i===2?' active':''}">
+            <span style="font-size:28px">${CAT[c].i}</span>
+            <span style="font-size:12px;font-weight:700;color:${i===2?'#1e3270':'#64748b'}">${CAT[c].l}</span>
+          </button>`).join('')}
+        </div>
+        <input type="hidden" id="icat" value="remera"/>
+      </div>
+      <div style="margin-bottom:20px">
+        <label style="font-size:13px;font-weight:700;color:#374151;display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">Título *</label>
+        <input id="ititle" type="text" class="input-field" placeholder="Ej: Pantalón azul marino talle M, buen estado" required maxlength="100"/>
+      </div>
+      <div style="margin-bottom:20px">
+        <label style="font-size:13px;font-weight:700;color:#374151;display:block;margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px">Talle *</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          ${SIZES.map((s,i)=>`<button type="button" data-sz="${s}" onclick="selSz('${s}')" class="size-pill${i===3?' active':''}">${s}</button>`).join('')}
+        </div>
+        <input type="hidden" id="isz" value="L"/>
+      </div>
+      <div style="margin-bottom:20px">
+        <label style="font-size:13px;font-weight:700;color:#374151;display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">Descripción</label>
+        <textarea id="idesc" class="input-field" rows="4" placeholder="Describí el estado de la prenda, cuánto tiempo fue usada, si tiene algún desgaste..." style="resize:none;font-family:inherit" maxlength="500"></textarea>
+      </div>
+      <div style="margin-bottom:24px">
+        <label style="font-size:13px;font-weight:700;color:#374151;display:block;margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px">Foto</label>
+        <div id="imgdrop" onclick="document.getElementById('imgfile').click()" style="border:2px dashed #cbd5e1;border-radius:16px;cursor:pointer;overflow:hidden;transition:border-color .15s" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#cbd5e1'">
+          <div id="imgph" style="padding:48px;text-align:center;color:#94a3b8">
+            <div style="font-size:36px;margin-bottom:10px">📷</div>
+            <div style="font-size:14px;font-weight:600">Tocá para subir una foto</div>
+            <div style="font-size:12px;margin-top:4px">JPG, PNG — máx. 10MB</div>
+          </div>
+          <img id="imgprev" style="display:none;width:100%;max-height:260px;object-fit:cover"/>
+        </div>
+        <input id="imgfile" type="file" accept="image/*" style="display:none" onchange="handleImg(event)"/>
+        <input type="hidden" id="iimg" value=""/>
+      </div>
+      <button type="submit" class="btn-primary" style="width:100%;padding:15px;font-size:15px">✓ Publicar prenda</button>
+    </form>
+    </div>
+  </div></div></div>`}
+
+// ── ITEM DETAIL ───────────────────────────────────────────────────────────────
+function renderItem(){
+  const item=state.items.find(i=>i.id===state.selectedId);
+  if(!item){go('home');return''}
+  const cmts=icomments(item.id);
+  const isOwner=state.session?.id===item.uid;
+  const ic=icount(item.id),cc=cmts.length;
+  const c=CAT[item.cat];
+
+  const cmtList=cmts.map(cm=>{
+    const cfg=INT[cm.type];
+    return`<div class="comment-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        ${av(cm.uid,30)}
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-size:13px;font-weight:700;color:#0f172a">${uname(cm.uid)}</span>
+            <span class="tag ${cfg.cls}" style="font-size:11px">${cfg.i} ${cfg.l}</span>
+          </div>
+          <span style="font-size:11px;color:#94a3b8">${cm.date}</span>
+        </div>
+      </div>
+      <p style="font-size:14px;color:#374151;line-height:1.6;margin-left:38px">${cm.text}</p>
+    </div>`}).join('');
+
+  const cmtForm=state.session&&item.status==='disponible'&&!isOwner?`
+  <div style="margin-top:28px">
+    <h3 style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:12px">Dejá tu comentario</h3>
+    <div style="background:white;border-radius:16px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+        <button type="button" data-it="interesado" onclick="selIt('interesado')" class="int-btn">⭐ Me interesa</button>
+        <button type="button" data-it="comentario" onclick="selIt('comentario')" class="int-btn active-com">💬 Tengo una pregunta</button>
+        <button type="button" data-it="no_interesado" onclick="selIt('no_interesado')" class="int-btn">👎 No me interesa</button>
+      </div>
+      <input type="hidden" id="ctype" value="comentario"/>
+      <textarea id="ctext" class="input-field" rows="3" placeholder="Escribí tu comentario aquí..." style="resize:none;font-family:inherit" maxlength="500"></textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+        <span id="ccount" style="font-size:12px;color:#94a3b8">0/500</span>
+        <button onclick="subCmt(${item.id})" class="btn-primary" style="padding:9px 20px;font-size:13px">Publicar comentario</button>
+      </div>
+    </div>
+  </div>`:(!state.session?`
+  <div style="margin-top:24px;background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #bfdbfe;border-radius:16px;padding:28px;text-align:center">
+    <p style="font-size:16px;font-weight:700;color:#1e40af;margin-bottom:8px">¿Te interesa esta prenda?</p>
+    <p style="font-size:14px;color:#3b82f6;margin-bottom:20px">Iniciá sesión para dejar un comentario o mostrar tu interés.</p>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button onclick="go('login')" class="btn-primary">Iniciar sesión</button>
+      <button onclick="go('register')" class="btn-outline">Registrarse</button>
+    </div>
+  </div>`:'');
+
+  const ownerTip=isOwner&&item.status==='disponible'&&cc>0?`
+  <div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:12px;padding:14px 16px;margin-top:16px">
+    <p style="font-size:13px;color:#92400e;font-weight:600">💡 Cuando hayas coordinado el intercambio, marcá la prenda como intercambiada. Se notificará a todos los interesados automáticamente.</p>
+  </div>`:'';
+
+  const markArea=isOwner&&item.status==='disponible'?`
+  <div id="markArea" style="margin-top:20px">
+    <button onclick="showConfirm(${item.id})" style="width:100%;background:#16a34a;color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer" class="hover:opacity-90 transition">✓ Marcar como intercambiado</button>
+  </div>`:''
+
+  const doneBlock=item.status==='intercambiado'?`
+  <div style="background:#f8fafc;border-radius:14px;padding:20px;text-align:center;margin-top:16px">
+    <div style="font-size:32px;margin-bottom:8px">🎉</div>
+    <p style="font-size:15px;font-weight:700;color:#0f172a">Este intercambio ya fue realizado</p>
+    <p style="font-size:13px;color:#64748b;margin-top:4px">Se notificó a todos los usuarios interesados.</p>
+  </div>`:''
+
+  return`<div class="page"><div style="min-height:100vh;background:#f8fafc">
+  ${navbar()}
+  <div style="max-width:900px;margin:0 auto;padding:28px 16px">
+    <button onclick="go('home')" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:#3b82f6;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:20px">
+      ← Volver al inicio
+    </button>
+    <div style="background:white;border-radius:20px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.08)">
+      <div style="display:flex;flex-direction:column">
+        <div style="display:flex;flex-wrap:wrap">
+          <div style="flex:1;min-width:280px;min-height:320px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;position:relative">
+            <img src="${item.img}" alt="${item.title}" style="width:100%;height:100%;object-fit:cover;max-height:420px"/>
+            ${item.status==='intercambiado'?`<div style="position:absolute;inset:0;background:rgba(15,23,42,.5);display:flex;align-items:center;justify-content:center"><span style="background:white;border-radius:99px;padding:8px 20px;font-size:14px;font-weight:800;color:#1e293b">✓ Intercambiado</span></div>`:''}
+          </div>
+          <div style="flex:1;min-width:280px;padding:28px;display:flex;flex-direction:column">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px">
+              <h1 style="font-size:22px;font-weight:800;color:#0f172a;line-height:1.3">${item.title}</h1>
+              ${item.status==='intercambiado'?`<span class="tag" style="background:#1e293b;color:white;white-space:nowrap;flex-shrink:0">✓ Intercambiado</span>`:`<span class="tag" style="background:#dcfce7;color:#16a34a;white-space:nowrap;flex-shrink:0">● Disponible</span>`}
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+              <span class="tag" style="background:${c.bg.replace('bg-','')};font-size:12px">${c.i} ${c.l}</span>
+              <span class="tag" style="background:#f1f5f9;color:#475569;font-size:12px">Talle ${item.size}</span>
+            </div>
+            <p style="font-size:14px;color:#475569;line-height:1.7;margin-bottom:20px">${item.desc}</p>
+            <div style="margin-top:auto;border-top:1px solid #f1f5f9;padding-top:16px">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                ${av(item.uid,28)}
+                <div><span style="font-size:13px;font-weight:700;color:#0f172a">${uname(item.uid)}</span><br/><span style="font-size:11px;color:#94a3b8">${item.date}</span></div>
+              </div>
+              <div style="display:flex;gap:14px;margin-top:10px">
+                ${ic>0?`<span style="font-size:13px;font-weight:700;color:#16a34a">⭐ ${ic} interesado${ic!==1?'s':''}</span>`:''}
+                ${cc>0?`<span style="font-size:13px;color:#94a3b8">💬 ${cc} comentario${cc!==1?'s':''}</span>`:''}
+              </div>
+            </div>
+            ${markArea}
+            ${doneBlock}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:32px">
+      <h2 style="font-size:18px;font-weight:800;color:#0f172a;margin-bottom:16px">Comentarios (${cc})</h2>
+      ${cc===0?`<div style="background:white;border-radius:16px;padding:40px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)"><div style="font-size:36px;margin-bottom:12px">💬</div><p style="color:#64748b;font-size:14px">Todavía no hay comentarios. ¡Sé el primero!</p></div>`:''}
+      <div style="display:flex;flex-direction:column;gap:10px" id="clist">${cmtList}</div>
+      ${cmtForm}
+      ${ownerTip}
+    </div>
+  </div></div></div>`}
+
+// ── NOTIFICATIONS ─────────────────────────────────────────────────────────────
+function renderNotifs(){
+  if(!state.session){go('login');return''}
+  const mine=state.notifs.filter(n=>n.uid===state.session.id);
+  mine.forEach(n=>n.read=true);
+  return`<div class="page"><div style="min-height:100vh;background:#f8fafc">
+  ${navbar()}
+  <div style="max-width:600px;margin:0 auto;padding:28px 16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <h1 style="font-size:22px;font-weight:800;color:#0f172a">🔔 Notificaciones</h1>
+      <button onclick="go('home')" style="color:#3b82f6;background:none;border:none;font-size:14px;font-weight:600;cursor:pointer">← Volver</button>
+    </div>
+    ${mine.length===0?`
+    <div style="background:white;border-radius:20px;padding:60px 24px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+      <div style="font-size:52px;margin-bottom:16px">🔔</div>
+      <h3 style="font-size:17px;font-weight:700;color:#0f172a;margin-bottom:8px">No tenés notificaciones</h3>
+      <p style="font-size:14px;color:#64748b;max-width:320px;margin:0 auto;line-height:1.6">Cuando alguien marque como intercambiada una prenda que te interesó, recibirás una notificación aquí.</p>
+    </div>
+    <div style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #bfdbfe;border-radius:14px;padding:16px;margin-top:14px;text-align:center">
+      <p style="font-size:13px;color:#1d4ed8;line-height:1.6">💡 <strong>Probalo:</strong> entrá a una prenda, dejá un comentario con ⭐ "Me interesa". Si iniciás sesión como <strong>maría</strong> y entrás al pantalón, podés marcarlo como intercambiado para que Carlos reciba una notificación.</p>
+    </div>
+    `:`<div style="display:flex;flex-direction:column;gap:10px">
+    ${mine.map(n=>`
+    <div style="background:white;border-radius:14px;padding:16px;border:1.5px solid #f1f5f9;box-shadow:0 2px 6px rgba(0,0,0,.05)">
+      <div style="display:flex;gap:12px">
+        <span style="font-size:20px;flex-shrink:0;margin-top:2px">📦</span>
+        <div style="flex:1">
+          <p style="font-size:14px;font-weight:600;color:#0f172a;margin-bottom:4px">${n.msg}</p>
+          ${n.ititle?`<p style="font-size:12px;color:#64748b;margin-bottom:6px">Prenda: <strong>${n.ititle}</strong></p>`:''}
+          ${n.iid?`<button onclick="go('item',{selectedId:${n.iid}})" style="font-size:12px;color:#3b82f6;background:none;border:none;cursor:pointer;font-weight:600;padding:0">Ver prenda →</button>`:''}
+          <p style="font-size:11px;color:#94a3b8;margin-top:6px">${n.date}</p>
+        </div>
+      </div>
+    </div>`).join('')}
+    </div>`}
+  </div></div></div>`}
+
+// ── EVENT BINDING ─────────────────────────────────────────────────────────────
+function bind(){
+  const lf=document.getElementById('lf');
+  if(lf)lf.addEventListener('submit',e=>{e.preventDefault();
+    const email=document.getElementById('le').value.trim().toLowerCase();
+    const pass=document.getElementById('lp').value;
+    const u=state.users.find(u=>u.email===email&&u.pass===pass);
+    if(!u){const er=document.getElementById('lerr');er.textContent='Email o contraseña incorrectos.';er.style.display='block';}
+    else{state.session=u;go('home');}
+  });
+  const rf=document.getElementById('rf');
+  if(rf)rf.addEventListener('submit',e=>{e.preventDefault();
+    const name=document.getElementById('rn').value.trim();
+    const email=document.getElementById('re').value.trim().toLowerCase();
+    const pass=document.getElementById('rp').value;
+    if(state.users.find(u=>u.email===email)){const er=document.getElementById('rerr');er.textContent='El email ya está registrado.';er.style.display='block';return;}
+    const nu={id:state.users.length+1,name,email,pass};
+    state.users.push(nu);state.session=nu;go('home');
+  });
+  const nf=document.getElementById('nf');
+  if(nf)nf.addEventListener('submit',e=>{e.preventDefault();
+    const ni={id:state.nextId++,uid:state.session.id,
+      title:document.getElementById('ititle').value.trim(),
+      cat:document.getElementById('icat').value,
+      size:document.getElementById('isz').value,
+      desc:document.getElementById('idesc').value.trim(),
+      img:document.getElementById('iimg').value||IMGS[document.getElementById('icat').value+'1']||IMGS.remera1,
+      status:'disponible',date:new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'})};
+    state.items.unshift(ni);go('item',{selectedId:ni.id});
+  });
+  const ct=document.getElementById('ctext');
+  if(ct)ct.addEventListener('input',()=>{const el=document.getElementById('ccount');if(el)el.textContent=ct.value.length+'/500';});
+}
+
+function selCat(c){
+  document.getElementById('icat').value=c;
+  document.querySelectorAll('.cat-pill').forEach(b=>{
+    const sel=b.dataset.cat===c;
+    b.classList.toggle('active',sel);
+    b.querySelector('span:last-child').style.color=sel?'#1e3270':'#64748b';
+  });
+}
+function selSz(s){
+  document.getElementById('isz').value=s;
+  document.querySelectorAll('.size-pill').forEach(b=>b.classList.toggle('active',b.dataset.sz===s));
+}
+function selIt(t){
+  document.getElementById('ctype').value=t;
+  document.querySelectorAll('[data-it]').forEach(b=>{
+    b.className='int-btn'+(b.dataset.it===t?{interesado:' active-int',comentario:' active-com',no_interesado:' active-noint'}[t]:'');
+  });
+  const ta=document.getElementById('ctext');
+  if(ta)ta.placeholder=t==='interesado'?'¡Me interesa! Escribí algo para coordinar el intercambio...':'Escribí tu comentario o pregunta aquí...';
+}
+function handleImg(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement('canvas');
+      const m=800;let w=img.width,h=img.height;
+      if(w>m){h=Math.round(h*m/w);w=m;}if(h>m){w=Math.round(w*m/h);h=m;}
+      c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
+      const b=c.toDataURL('image/jpeg',.8);
+      document.getElementById('iimg').value=b;
+      const pv=document.getElementById('imgprev');
+      const ph=document.getElementById('imgph');
+      pv.src=b;pv.style.display='block';ph.style.display='none';
+    };img.src=ev.target.result;
+  };reader.readAsDataURL(file);
+}
+function showConfirm(id){
+  const area=document.getElementById('markArea');
+  if(!area)return;
+  area.innerHTML=`
+  <div style="margin-top:12px;border-radius:14px;overflow:hidden;border:1.5px solid #fde68a">
+    <div style="background:#fffbeb;padding:14px 16px">
+      <p style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:4px">¿Confirmar intercambio?</p>
+      <p style="font-size:12px;color:#b45309">Se notificará a todos los usuarios que mostraron interés en esta prenda.</p>
+    </div>
+    <div style="display:flex;gap:0;background:white">
+      <button onclick="go('item',{selectedId:${id}})" style="flex:1;padding:12px;border:none;border-right:1px solid #f1f5f9;cursor:pointer;font-size:13px;font-weight:600;color:#64748b;background:white" class="hover:opacity-80">Cancelar</button>
+      <button onclick="doExchange(${id})" style="flex:1;padding:12px;border:none;cursor:pointer;font-size:13px;font-weight:800;color:#16a34a;background:white" class="hover:opacity-80">✓ Confirmar</button>
+    </div>
+  </div>`;
+}
+function doExchange(id){
+  const item=state.items.find(i=>i.id===id);if(!item)return;
+  item.status='intercambiado';
+  const seen=new Set();
+  state.comments.filter(c=>c.iid===id&&c.type==='interesado'&&c.uid!==state.session.id).forEach(c=>{
+    if(!seen.has(c.uid)){seen.add(c.uid);
+    state.notifs.push({id:state.nextNid++,uid:c.uid,iid:id,ititle:item.title,
+      msg:`La prenda "${item.title}" que te interesaba ya fue intercambiada y no está más disponible.`,
+      read:false,date:new Date().toLocaleString('es-AR')});}
+  });
+  go('item',{selectedId:id});
+}
+function subCmt(id){
+  const text=document.getElementById('ctext').value.trim();
+  const type=document.getElementById('ctype').value;
+  if(!text)return;
+  state.comments.push({id:state.nextCid++,iid:id,uid:state.session.id,type,text,date:new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'short'})});
+  go('item',{selectedId:id});
+}
+
+function render(){
+  const app=document.getElementById('app');
+  const pages={home:renderHome,login:renderLogin,register:renderRegister,new:renderNew,item:renderItem,notifs:renderNotifs};
+  app.innerHTML=(pages[state.page]||renderHome)();
+  bind();
+}
+
+const styleEl=document.createElement('style');
+styleEl.textContent=`.bg-blue-50{background:#eff6ff}.bg-emerald-50{background:#ecfdf5}.bg-amber-50{background:#fffbeb}`;
+document.head.appendChild(styleEl);
+
+render();
+</script>
+</body>
+</html>
