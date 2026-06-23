@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 import { verifyToken } from '@/lib/auth'
-import { dbQueries } from '@/lib/db'
+import { dbQueries, Item } from '@/lib/db'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 
@@ -22,6 +22,35 @@ const CATEGORY_COLORS: Record<string, string> = {
   remera: 'bg-orange-100 text-orange-700',
 }
 
+function getDaysLeft(expiresAt: string | undefined): number {
+  if (!expiresAt) return 60
+  const expiry = new Date(expiresAt.replace(' ', 'T') + 'Z')
+  return Math.ceil((expiry.getTime() - Date.now()) / 86400000)
+}
+
+function ExpiryBadge({ item }: { item: Item }) {
+  if (item.status === 'intercambiado') return null
+  const days = getDaysLeft(item.expires_at)
+  if (days <= 0)
+    return (
+      <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-bold">
+        Expirada
+      </span>
+    )
+  const cls =
+    days <= 3
+      ? 'bg-red-50 text-red-600 border border-red-200'
+      : days <= 14
+        ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+        : 'bg-green-50 text-green-600 border border-green-200'
+  const icon = days <= 3 ? '🔴' : days <= 14 ? '⚠️' : '✅'
+  return (
+    <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${cls}`}>
+      {icon} {days}d
+    </span>
+  )
+}
+
 export default async function HomePage({
   searchParams,
 }: {
@@ -40,26 +69,26 @@ export default async function HomePage({
       <Navbar />
 
       {!session && (
-        <div className="bg-gradient-to-r from-blue-800 to-blue-600 text-white py-12 px-4">
+        <div className="bg-gradient-to-r from-green-900 to-green-700 text-white py-12 px-4">
           <div className="max-w-3xl mx-auto text-center">
             <div className="text-5xl mb-3">👕 👖 🧥</div>
             <h2 className="text-3xl font-bold mb-3">
               Intercambiá uniformes del Colegio Pablo Freire
             </h2>
-            <p className="text-blue-200 mb-8 max-w-xl mx-auto text-lg">
+            <p className="text-green-200 mb-8 max-w-xl mx-auto text-lg">
               Publicá las prendas que ya no usás y encontrá lo que necesitás.
               ¡Ahorrá y ayudá a otros alumnos!
             </p>
             <div className="flex gap-3 justify-center flex-wrap">
               <Link
                 href="/register"
-                className="bg-yellow-400 text-blue-900 px-8 py-3 rounded-xl font-bold text-lg hover:bg-yellow-300 transition"
+                className="bg-yellow-400 text-green-900 px-8 py-3 rounded-xl font-bold text-lg hover:bg-yellow-300 transition"
               >
                 Registrarse gratis
               </Link>
               <Link
                 href="/login"
-                className="border-2 border-white text-white px-8 py-3 rounded-xl font-semibold text-lg hover:bg-blue-700 transition"
+                className="border-2 border-white text-white px-8 py-3 rounded-xl font-semibold text-lg hover:bg-green-800 transition"
               >
                 Iniciar sesión
               </Link>
@@ -74,8 +103,8 @@ export default async function HomePage({
             href="/"
             className={`px-5 py-2.5 rounded-full font-medium text-sm whitespace-nowrap transition ${
               !category
-                ? 'bg-blue-700 text-white shadow-md'
-                : 'bg-white text-gray-600 border border-gray-200 hover:border-blue-300'
+                ? 'bg-green-800 text-white shadow-md'
+                : 'bg-white text-gray-600 border border-gray-200 hover:border-green-300'
             }`}
           >
             Todas las prendas
@@ -86,8 +115,8 @@ export default async function HomePage({
               href={`/?category=${cat}`}
               className={`px-5 py-2.5 rounded-full font-medium text-sm whitespace-nowrap transition flex items-center gap-1.5 ${
                 category === cat
-                  ? 'bg-blue-700 text-white shadow-md'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:border-blue-300'
+                  ? 'bg-green-800 text-white shadow-md'
+                  : 'bg-white text-gray-600 border border-gray-200 hover:border-green-300'
               }`}
             >
               <span>{CATEGORY_ICONS[cat]}</span>
@@ -110,7 +139,7 @@ export default async function HomePage({
             {session && (
               <Link
                 href="/items/new"
-                className="inline-block bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-800 transition"
+                className="inline-block bg-green-800 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-900 transition"
               >
                 Publicar prenda
               </Link>
@@ -147,7 +176,7 @@ export default async function HomePage({
 
                   <div className="p-4">
                     <div className="flex items-start justify-between gap-2 mb-2">
-                      <h3 className="font-semibold text-gray-800 text-sm leading-tight group-hover:text-blue-700 transition-colors line-clamp-2">
+                      <h3 className="font-semibold text-gray-800 text-sm leading-tight group-hover:text-green-700 transition-colors line-clamp-2">
                         {item.title}
                       </h3>
                       <span
@@ -166,7 +195,8 @@ export default async function HomePage({
                       <span className="truncate">por {item.owner_name}</span>
                     </div>
 
-                    <div className="flex items-center gap-3 pt-3 border-t border-gray-100 text-xs">
+                    <div className="flex items-center gap-2 pt-3 border-t border-gray-100 text-xs flex-wrap">
+                      <ExpiryBadge item={item} />
                       {(item.interest_count || 0) > 0 ? (
                         <span className="flex items-center gap-1 text-green-600 font-semibold">
                           ⭐ {item.interest_count}{' '}

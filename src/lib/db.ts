@@ -36,7 +36,8 @@ function initializeDb(db: Database.Database) {
       description TEXT DEFAULT '',
       image_data TEXT,
       status TEXT NOT NULL DEFAULT 'disponible' CHECK(status IN ('disponible', 'intercambiado')),
-      created_at TEXT DEFAULT (datetime('now'))
+      created_at TEXT DEFAULT (datetime('now')),
+      expires_at TEXT DEFAULT (datetime('now', '+60 days'))
     );
 
     CREATE TABLE IF NOT EXISTS comments (
@@ -58,6 +59,15 @@ function initializeDb(db: Database.Database) {
       created_at TEXT DEFAULT (datetime('now'))
     );
   `)
+
+  // Migration: add expires_at to existing tables that don't have it yet
+  try {
+    db.exec(`ALTER TABLE items ADD COLUMN expires_at TEXT`)
+    db.exec(`UPDATE items SET expires_at = datetime(created_at, '+60 days') WHERE expires_at IS NULL`)
+  } catch {
+    // Column already exists — no-op
+  }
+
   seedDb(db)
 }
 
@@ -77,12 +87,12 @@ function seedDb(db: Database.Database) {
     'INSERT INTO items (user_id, title, category, size, description) VALUES (?, ?, ?, ?, ?)'
   )
   const i1 = iStmt.run(
-    u1Id, 'Pantalón escolar azul marino', 'pantalon', 'M',
+    u1Id, 'Pantalón verde del colegio', 'pantalon', 'M',
     'En muy buen estado, usado solo un ciclo escolar. Sin roturas ni manchas.'
   )
   const i2 = iStmt.run(
-    u2Id, 'Remera polo blanca oficial', 'remera', 'S',
-    'Remera blanca sin manchas, lavada y lista para usar. Muy poco uso.'
+    u2Id, 'Remera amarilla con escudo Pablo Freire', 'remera', 'S',
+    'Remera del colegio sin manchas, lavada y lista para usar. Muy poco uso.'
   )
   const i3 = iStmt.run(
     u3Id, 'Pulso azul del colegio', 'pulso', 'L',
@@ -124,6 +134,7 @@ export interface Item {
   image_data: string | null
   status: 'disponible' | 'intercambiado'
   created_at: string
+  expires_at: string
   owner_name?: string
   comment_count?: number
   interest_count?: number
@@ -164,7 +175,7 @@ export const dbQueries = {
   getItems: (filter?: { category?: string }) => {
     let q = `
       SELECT i.id, i.user_id, i.title, i.category, i.size, i.description,
-             i.image_data, i.status, i.created_at, u.name as owner_name,
+             i.image_data, i.status, i.created_at, i.expires_at, u.name as owner_name,
              COUNT(c.id) as comment_count,
              SUM(CASE WHEN c.interest_type = 'interesado' THEN 1 ELSE 0 END) as interest_count
       FROM items i
@@ -223,6 +234,11 @@ export const dbQueries = {
 
   markItemAsExchanged: (id: number) =>
     getDb().prepare("UPDATE items SET status = 'intercambiado' WHERE id = ?").run(id),
+
+  isItemExpired: (item: Item): boolean => {
+    if (!item.expires_at) return false
+    return new Date(item.expires_at.replace(' ', 'T') + 'Z') < new Date()
+  },
 
   getCommentsByItem: (itemId: number) =>
     getDb()

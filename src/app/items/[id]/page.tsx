@@ -28,6 +28,12 @@ const INTEREST_CONFIG: Record<string, { icon: string; label: string; color: stri
   comentario: { icon: '💬', label: 'Comentario', color: 'text-blue-700 bg-blue-100' },
 }
 
+function getDaysLeft(expiresAt: string | undefined): number {
+  if (!expiresAt) return 60
+  const expiry = new Date(expiresAt.replace(' ', 'T') + 'Z')
+  return Math.ceil((expiry.getTime() - Date.now()) / 86400000)
+}
+
 export default async function ItemDetailPage({ params }: { params: { id: string } }) {
   const cookieStore = cookies()
   const token = cookieStore.get('session')?.value
@@ -42,6 +48,17 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
   const comments = dbQueries.getCommentsByItem(itemId)
   const isOwner = session?.userId === item.user_id
 
+  const daysLeft = getDaysLeft(item.expires_at)
+  const isExpired = daysLeft <= 0
+
+  const expiryDate = item.expires_at
+    ? new Date(item.expires_at.replace(' ', 'T') + 'Z').toLocaleDateString('es-AR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      })
+    : null
+
   const formattedDate = new Date(item.created_at).toLocaleDateString('es-AR', {
     year: 'numeric',
     month: 'long',
@@ -54,10 +71,46 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
       <div className="max-w-4xl mx-auto px-4 py-8">
         <Link
           href="/"
-          className="text-blue-600 text-sm hover:underline flex items-center gap-1 mb-6"
+          className="text-green-700 text-sm hover:underline flex items-center gap-1 mb-6"
         >
           ← Volver al inicio
         </Link>
+
+        {/* Expiry banner */}
+        {item.status === 'disponible' && (
+          <div
+            className={`rounded-xl p-3 mb-5 flex items-center gap-3 ${
+              isExpired
+                ? 'bg-red-50 border border-red-200'
+                : daysLeft <= 3
+                  ? 'bg-red-50 border border-red-200'
+                  : daysLeft <= 14
+                    ? 'bg-yellow-50 border border-yellow-200'
+                    : 'bg-green-50 border border-green-200'
+            }`}
+          >
+            <span className="text-xl">
+              {isExpired ? '⛔' : daysLeft <= 3 ? '🔴' : daysLeft <= 14 ? '⚠️' : '✅'}
+            </span>
+            <p
+              className={`text-sm font-semibold ${
+                isExpired || daysLeft <= 3
+                  ? 'text-red-700'
+                  : daysLeft <= 14
+                    ? 'text-yellow-800'
+                    : 'text-green-700'
+              }`}
+            >
+              {isExpired
+                ? 'Esta publicación ha expirado (más de 60 días sin intercambio).'
+                : daysLeft <= 3
+                  ? `¡Quedan solo ${daysLeft} día${daysLeft !== 1 ? 's' : ''}! La publicación expira el ${expiryDate}.`
+                  : daysLeft <= 14
+                    ? `⚡ Aviso: esta publicación expira en ${daysLeft} días, el ${expiryDate}.`
+                    : `Esta publicación estará disponible por ${daysLeft} días más (hasta el ${expiryDate}).`}
+            </p>
+          </div>
+        )}
 
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
           <div className="md:flex">
@@ -179,10 +232,17 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
             })}
           </div>
 
-          {session && item.status === 'disponible' && !isOwner && (
+          {session && item.status === 'disponible' && !isOwner && !isExpired && (
             <div className="mt-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-3">Dejá tu comentario</h3>
               <CommentForm itemId={item.id} />
+            </div>
+          )}
+
+          {session && item.status === 'disponible' && !isOwner && isExpired && (
+            <div className="mt-6 bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
+              <p className="text-red-700 font-semibold">⛔ Esta publicación ha expirado.</p>
+              <p className="text-red-500 text-sm mt-1">Ya no se pueden dejar comentarios.</p>
             </div>
           )}
 
@@ -197,13 +257,13 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
               <div className="flex gap-3 justify-center">
                 <Link
                   href="/login"
-                  className="bg-blue-700 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-blue-800 transition"
+                  className="bg-green-800 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-green-900 transition"
                 >
                   Iniciar sesión
                 </Link>
                 <Link
                   href="/register"
-                  className="border border-blue-300 text-blue-700 px-6 py-2.5 rounded-xl font-semibold hover:bg-blue-100 transition"
+                  className="border border-green-300 text-green-700 px-6 py-2.5 rounded-xl font-semibold hover:bg-green-100 transition"
                 >
                   Registrarse
                 </Link>
